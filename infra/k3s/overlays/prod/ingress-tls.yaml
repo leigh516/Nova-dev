@@ -1,0 +1,16 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 자리표시: nova.project.json 에 tls 가 없다 — 인증서 시크릿 nova-tls 를 인그레스 네임스페이스마다 직접 넣거나
+# tls.cluster_issuer(cert-manager)를 적고 python nova.py gen. 절차는 docs/conventions/deploy.md '첫 배포 준비'
+# Traefik 은 기본으로 다른 네임스페이스의 미들웨어를 쓰지 못한다 — 인그레스가 있는 네임스페이스마다 하나씩
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata: {name: hsts, namespace: edge}
+spec:
+  headers: {stsSeconds: 31536000, stsIncludeSubdomains: true, forceSTSHeader: true}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata: {name: hsts, namespace: observability}
+spec:
+  headers: {stsSeconds: 31536000, stsIncludeSubdomains: true, forceSTSHeader: true}
+---

@@ -1,0 +1,24 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 알림 라우팅(k3s 운영) — critical 은 즉시, warning 은 묶어서.
+# 수신처 두 곳 — gateway(클러스터 내부) + oncall(시크릿 alertmanager-receivers 의 oncall-url 파일).
+# critical · warning 모두 두 곳으로(continue: true). severity 가 없는 알림은 기본 수신처 gateway 로만 간다
+route:
+  receiver: gateway
+  group_by: [alertname, service]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+  - {matchers: ['severity="critical"'], receiver: gateway, group_wait: 10s, repeat_interval: 30m, continue: true}
+  - {matchers: ['severity="critical"'], receiver: oncall, group_wait: 10s, repeat_interval: 30m}
+  - {matchers: ['severity="warning"'], receiver: gateway, continue: true}
+  - {matchers: ['severity="warning"'], receiver: oncall}
+receivers:
+- name: gateway
+  webhook_configs:
+  - url: http://gateway.edge.svc.cluster.local:8000/internal/alertmanager  # 클러스터 내부 전용(인그레스 미노출)
+    send_resolved: true
+- name: oncall
+  webhook_configs:
+  - url_file: /etc/alertmanager/receivers/oncall-url
+    send_resolved: true

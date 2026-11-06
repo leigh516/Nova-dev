@@ -1,0 +1,77 @@
+{{- $root := . }}
+{{- range $name, $s := .Values.services }}
+{{- $env := upper (replace "-" "_" $name) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ $s.namespace }}
+  labels: {app: {{ $name }}, app.kubernetes.io/part-of: {{ $root.Values.project }}, helm.sh/chart: {{ $root.Chart.Name }}-{{ $root.Chart.Version }}}
+spec:
+  replicas: {{ $s.replicas }}
+  selector: {matchLabels: {app: {{ $name }}}}
+  template:
+    metadata:
+      labels: {app: {{ $name }}, app.kubernetes.io/part-of: {{ $root.Values.project }}}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000"}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      containers:
+      - name: app
+        image: "{{ $root.Values.image.registry }}/{{ $name }}:{{ $root.Values.image.tag }}"
+        imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+        ports: [{name: http, containerPort: 8000}]
+        env:
+        # 운영 안전장치 — k3s(overlays/prod)와 같다. NOVA_ENV=prod 면 기본 JWT 키 · 켜진 개발 기능이 있을 때 기동 거부(fail-closed)
+        - {name: NOVA_ENV, value: {{ $root.Values.env | default "prod" | quote }}}
+        - name: JWT_SECRET
+          valueFrom: {secretKeyRef: {name: {{ $root.Values.jwtSecret.name }}, key: {{ $root.Values.jwtSecret.key }}}}
+        - {name: NOVA_PACKS, value: {{ $root.Values.packs | default "" | quote }}}
+        - {name: GW_CORS_ORIGINS, value: {{ $root.Values.corsOrigins | default "" | quote }}}
+        # 레이트리밋 키의 클라이언트 IP — XFF 오른쪽 몇 홉을 믿을지(게이트웨이만 읽는다). 기본 0 = XFF 무시(위조 방지)
+        - {name: GW_TRUSTED_HOPS, value: {{ $root.Values.trustedHops | default "0" | quote }}}
+        - {name: KAFKA_BOOTSTRAP, value: {{ $root.Values.kafkaBootstrap | quote }}}
+        - {name: PROMETHEUS_URL, value: {{ $root.Values.prometheusUrl | quote }}}
+        {{- range $n, $t := $root.Values.services }}
+        - {name: SVC_{{ upper (replace "-" "_" $n) }}_URL, value: "http://{{ $n }}.{{ $t.namespace }}.svc.cluster.local:8000"}
+        {{- end }}
+        {{- if $s.db }}
+        - name: DATABASE_URL_{{ $env }}
+          valueFrom: {secretKeyRef: {name: {{ $root.Values.project }}-db-{{ $name }}, key: url}}
+        {{- end }}
+        resources:
+          requests: {cpu: {{ $s.cpu }}, memory: {{ $s.memory }}}
+          limits: {memory: {{ $s.memoryLimit }}}
+        # probe · 보안 컨텍스트 · /tmp emptyDir 는 k3s svc-<서비스>(gen_k3s deployment())와 같은 값 — tests/test_infra.py 가 줄 단위로 대조
+        readinessProbe: {httpGet: {path: /readyz, port: http}, periodSeconds: 5, failureThreshold: 3}
+        livenessProbe: {httpGet: {path: /healthz, port: http}, initialDelaySeconds: 15, periodSeconds: 15}
+        startupProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 2, failureThreshold: 30}
+        securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+        volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {sizeLimit: 64Mi}}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: {{ $name }}, namespace: {{ $s.namespace }}}
+spec:
+  selector: {app: {{ $name }}}
+  ports: [{name: http, port: 8000, targetPort: http}]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: {name: {{ $name }}, namespace: {{ $s.namespace }}}
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: {{ $name }}}
+  minReplicas: {{ $s.replicas }}
+  maxReplicas: {{ $s.hpaMax }}
+  metrics: [{type: Resource, resource: {name: cpu, target: {type: Utilization, averageUtilization: 70}}}]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: {{ $name }}, namespace: {{ $s.namespace }}}
+spec:
+  maxUnavailable: 1
+  selector: {matchLabels: {app: {{ $name }}}}
+---
+{{- end }}

@@ -1,0 +1,30 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# k3s 기본 Traefik. 운영은 overlays/prod 가 TLS · websecure 전용 · HSTS 를 덧붙인다(ingress-tls.yaml) — 개발은 *.nova.local 을 hosts 파일에 등록
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nova
+  namespace: edge
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: api.nova.local
+    http: {paths: [{path: /v1, pathType: Prefix, backend: {service: {name: gateway, port: {number: 8000}}}}]}
+  - host: nova.local
+    http:
+      paths:
+      - {path: /v1, pathType: Prefix, backend: {service: {name: gateway, port: {number: 8000}}}}
+      - {path: /, pathType: Prefix, backend: {service: {name: web-app, port: {number: 3000}}}}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: grafana
+  namespace: observability
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: grafana.nova.local
+    http: {paths: [{path: /, pathType: Prefix, backend: {service: {name: grafana, port: {number: 3000}}}}]}

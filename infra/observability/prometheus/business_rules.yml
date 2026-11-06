@@ -1,0 +1,9 @@
+# 프로젝트 업무 규칙(손 관리) — 업무 메트릭(nova_business_events_total{kind,status} · nova_business_amount_total{kind,currency} · nova_saga_duration_seconds)으로
+# 기록 규칙 · 알림을 여기에 쓴다. 예:
+#   - record: order:confirmed:increase1h
+#     expr: sum(increase(nova_business_events_total{kind="order",status="confirmed"}[1h]))
+#   - alert: OrderFailureSpike
+#     expr: sum(increase(nova_business_events_total{kind="order",status="failed"}[10m])) > 5
+#     labels: {severity: warning}
+#     annotations: {summary: "10분간 주문 실패 {{ $value }}건"}
+groups: []

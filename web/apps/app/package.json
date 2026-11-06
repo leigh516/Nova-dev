@@ -1,0 +1,12 @@
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p ${PORT:-3000}",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {"next": "15.5.28", "react": "19.0.0", "react-dom": "19.0.0", "@nova/ui": "0.1.0", "@nova/sdk": "0.1.0"}
+}

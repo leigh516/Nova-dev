@@ -1,0 +1,166 @@
+{
+  "$description": "디자인 토큰 — 단일 원천(W3C DTCG Format 2025.10). scripts/gen_tokens.py 가 웹 CSS · KMP Kotlin 을 생성하고 WCAG 2.2 AA 대비를 검사한다. 값을 바꿀 때는 이 파일만 고친다. 프로젝트 브랜드는 primitive.color.brand · accent 단계 값과 font.family 만 바꾸면 된다(의미 토큰 이름은 그대로).",
+  "primitive": {
+    "$description": "1계층 원시값 — 화면 · 컴포넌트가 직접 참조하지 않는다(의미 토큰을 거친다).",
+    "color": {
+      "$type": "color",
+      "neutral": {
+        "0": { "$value": "#FFFFFF" }, "50": { "$value": "#F7F8FA" }, "100": { "$value": "#EEF0F4" }, "200": { "$value": "#E1E4EA" },
+        "400": { "$value": "#9AA2B1" }, "500": { "$value": "#737C8C" }, "600": { "$value": "#586172" }, "700": { "$value": "#3D4553" },
+        "800": { "$value": "#262C38" }, "850": { "$value": "#1A1F29" }, "900": { "$value": "#141821" }, "950": { "$value": "#0D1016" }
+      },
+      "brand": { "900": { "$value": "#1E2366" }, "700": { "$value": "#3A43B8" }, "600": { "$value": "#4F5BD5" }, "300": { "$value": "#A3ABF7" }, "100": { "$value": "#ECEEFE" }, "dark100": { "$value": "#22274F" } },
+      "accent": { "800": { "$value": "#7A4F00" }, "400": { "$value": "#F5B83D" }, "300": { "$value": "#F9CF73" }, "100": { "$value": "#FDF1D6" }, "dark100": { "$value": "#3A2F17" } },
+      "green": { "700": { "$value": "#0E7A57" }, "300": { "$value": "#5CC79B" }, "100": { "$value": "#E3F3EC" }, "dark100": { "$value": "#15322A" } },
+      "red": { "700": { "$value": "#B42F2F" }, "500": { "$value": "#D64545" }, "300": { "$value": "#F08A8A" }, "100": { "$value": "#FBE5E5" }, "dark100": { "$value": "#3A1F1F" } },
+      "blue": { "700": { "$value": "#2459C4" }, "650": { "$value": "#2A64D0" }, "600": { "$value": "#2F6FE4" }, "300": { "$value": "#86AFFF" }, "200": { "$value": "#93BBFF" }, "100": { "$value": "#E5EEFC" }, "dark100": { "$value": "#1D2A44" } },
+      "violet": { "700": { "$value": "#6D28D9" }, "600": { "$value": "#7C4DDB" }, "400": { "$value": "#B9A2FF" }, "300": { "$value": "#C4B5FD" }, "100": { "$value": "#EDE9FE" }, "dark100": { "$value": "#2A2145" } },
+      "teal": { "700": { "$value": "#0D7D72" }, "300": { "$value": "#4FD1C1" } },
+      "amber": { "700": { "$value": "#A35A09" }, "300": { "$value": "#F6B35C" } },
+      "orange": { "700": { "$value": "#C2410C" }, "300": { "$value": "#FF9A6B" } },
+      "pink": { "700": { "$value": "#C2307A" }, "300": { "$value": "#F59AC6" } },
+      "cyan": { "700": { "$value": "#0E7490" }, "300": { "$value": "#5FD4EE" } },
+      "lime": { "700": { "$value": "#4D7C0F" }, "300": { "$value": "#A3E05A" } },
+      "fuchsia": { "700": { "$value": "#A21CAF" }, "300": { "$value": "#F0ABFC" } }
+    },
+    "space": { "$type": "dimension", "0": { "$value": { "value": 0, "unit": "px" } }, "1": { "$value": { "value": 4, "unit": "px" } }, "2": { "$value": { "value": 8, "unit": "px" } }, "3": { "$value": { "value": 12, "unit": "px" } }, "4": { "$value": { "value": 16, "unit": "px" } }, "5": { "$value": { "value": 20, "unit": "px" } }, "6": { "$value": { "value": 24, "unit": "px" } }, "8": { "$value": { "value": 32, "unit": "px" } }, "10": { "$value": { "value": 40, "unit": "px" } }, "12": { "$value": { "value": 48, "unit": "px" } } },
+    "radius": { "$type": "dimension", "sm": { "$value": { "value": 6, "unit": "px" } }, "md": { "$value": { "value": 10, "unit": "px" } }, "lg": { "$value": { "value": 14, "unit": "px" } }, "xl": { "$value": { "value": 20, "unit": "px" } }, "pill": { "$value": { "value": 999, "unit": "px" } } },
+    "font": {
+      "family": { "$type": "fontFamily", "base": { "$value": ["Pretendard", "Noto Sans KR", "system-ui", "-apple-system", "sans-serif"] }, "mono": { "$value": ["JetBrains Mono", "D2Coding", "ui-monospace", "monospace"] } },
+      "size": { "$type": "dimension", "xs": { "$value": { "value": 12, "unit": "px" } }, "sm": { "$value": { "value": 13, "unit": "px" } }, "md": { "$value": { "value": 15, "unit": "px" } }, "lg": { "$value": { "value": 17, "unit": "px" } }, "xl": { "$value": { "value": 20, "unit": "px" } }, "2xl": { "$value": { "value": 24, "unit": "px" } }, "3xl": { "$value": { "value": 32, "unit": "px" } } },
+      "weight": { "$type": "fontWeight", "regular": { "$value": 400 }, "medium": { "$value": 500 }, "semibold": { "$value": 600 }, "bold": { "$value": 700 } }
+    },
+    "duration": { "$type": "duration", "fast": { "$value": { "value": 120, "unit": "ms" } }, "base": { "$value": { "value": 200, "unit": "ms" } }, "slow": { "$value": { "value": 320, "unit": "ms" } } }
+  },
+  "semantic": {
+    "$description": "2계층 의미 토큰 — 역할 이름. 다크 값은 $extensions[\"nova.modes\"].dark. 컴포넌트는 이 계층만 참조한다.",
+    "color": {
+      "$type": "color",
+      "bg": {
+        "canvas":   { "$value": "{primitive.color.neutral.50}",  "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.950}" } } },
+        "surface":  { "$value": "{primitive.color.neutral.0}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.850}" } } },
+        "subtle":   { "$value": "{primitive.color.neutral.100}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.900}" } } },
+        "inverse":  { "$value": "{primitive.color.neutral.900}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.900}" } } },
+        "inverse2": { "$value": "{primitive.color.neutral.800}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.800}" } } },
+        "nav": { "$value": "{primitive.color.brand.900}", "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.900}" } } },
+        "navActive": { "$value": "{primitive.color.brand.300}", "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.300}" } } }
+      },
+      "text": {
+        "primary":      { "$value": "{primitive.color.neutral.900}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.50}" } } },
+        "secondary":    { "$value": "{primitive.color.neutral.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.200}" } } },
+        "muted":        { "$value": "{primitive.color.neutral.600}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.400}" } } },
+        "inverse":      { "$value": "{primitive.color.neutral.50}",  "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.50}" } } },
+        "inverseMuted": { "$value": "{primitive.color.neutral.400}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.400}" } } },
+        "brand":        { "$value": "{primitive.color.brand.600}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.300}" } } },
+        "onNav": { "$value": "{primitive.color.neutral.50}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.50}" } } },
+        "onNavMuted": { "$value": "{primitive.color.neutral.400}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.400}" } } },
+        "onNavActive": { "$value": "{primitive.color.neutral.900}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.900}" } } }
+      },
+      "border": {
+        "subtle":  { "$value": "{primitive.color.neutral.200}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.800}" } } },
+        "control": { "$value": "{primitive.color.neutral.500}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.500}" } } },
+        "focus":   { "$value": "{primitive.color.brand.600}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.300}" } } },
+        "focusOnNav": { "$value": "{primitive.color.brand.300}", "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.300}" } } }
+      },
+      "action": {
+        "primary":   { "$value": "{primitive.color.brand.600}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.600}" } } },
+        "onPrimary": { "$value": "{primitive.color.neutral.0}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.0}" } } },
+        "accent":    { "$value": "{primitive.color.accent.400}",  "$extensions": { "nova.modes": { "dark": "{primitive.color.accent.400}" } } },
+        "onAccent":  { "$value": "{primitive.color.neutral.900}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.900}" } } },
+        "danger":    { "$value": "{primitive.color.red.700}",     "$extensions": { "nova.modes": { "dark": "{primitive.color.red.700}" } } },
+        "onDanger":  { "$value": "{primitive.color.neutral.0}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.0}" } } }
+      },
+      "status": {
+        "infoFg":    { "$value": "{primitive.color.brand.600}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.300}" } } },
+        "infoBg":    { "$value": "{primitive.color.brand.100}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.dark100}" } } },
+        "successFg": { "$value": "{primitive.color.green.700}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.green.300}" } } },
+        "successBg": { "$value": "{primitive.color.green.100}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.green.dark100}" } } },
+        "warningFg": { "$value": "{primitive.color.accent.800}",  "$extensions": { "nova.modes": { "dark": "{primitive.color.accent.300}" } } },
+        "warningBg": { "$value": "{primitive.color.accent.100}",  "$extensions": { "nova.modes": { "dark": "{primitive.color.accent.dark100}" } } },
+        "dangerFg":  { "$value": "{primitive.color.red.700}",     "$extensions": { "nova.modes": { "dark": "{primitive.color.red.300}" } } },
+        "dangerBg":  { "$value": "{primitive.color.red.100}",     "$extensions": { "nova.modes": { "dark": "{primitive.color.red.dark100}" } } },
+        "linkFg":    { "$value": "{primitive.color.blue.700}",    "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.300}" } } },
+        "linkBg":    { "$value": "{primitive.color.blue.100}",    "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.dark100}" } } },
+        "neutralFg": { "$value": "{primitive.color.neutral.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.200}" } } },
+        "neutralBg": { "$value": "{primitive.color.neutral.200}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.800}" } } },
+        "successSolid":   { "$value": "{primitive.color.green.700}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.green.300}" } } },
+        "warningSolid":   { "$value": "{primitive.color.accent.400}",  "$extensions": { "nova.modes": { "dark": "{primitive.color.accent.300}" } } },
+        "dangerSolid":    { "$value": "{primitive.color.red.700}",     "$extensions": { "nova.modes": { "dark": "{primitive.color.red.300}" } } },
+        "infoSolid":      { "$value": "{primitive.color.brand.600}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.300}" } } },
+        "neutralSolid":   { "$value": "{primitive.color.neutral.600}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.400}" } } },
+        "onSolid":        { "$value": "{primitive.color.neutral.0}",   "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.900}" } } },
+        "onWarningSolid": { "$value": "{primitive.color.neutral.900}", "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.900}" } } }
+      },
+      "ai": {
+        "$description": "AI 생성 · 제안 표식(STD-AX-001) — 단색만(그라데이션은 대비 쌍을 정의할 수 없다)",
+        "fg": { "$value": "{primitive.color.violet.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.violet.300}" } } },
+        "bg": { "$value": "{primitive.color.violet.100}", "$extensions": { "nova.modes": { "dark": "{primitive.color.violet.dark100}" } } },
+        "border": { "$value": "{primitive.color.violet.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.violet.300}" } } }
+      },
+      "domain": {
+        "$description": "도메인(업무 모듈) 식별색 — 번호 슬롯 1~6, 모듈 → 번호 매핑은 프로젝트 · 팩의 데이터(STD-DOMAIN-PACK-001). 상태색과 같은 값 · 같은 원시 참조 금지(separation), 경고 · 위험과 헷갈리지 않게 주황 · 갈색 계열은 쓰지 않는다",
+        "1": { "mark": { "$value": "{primitive.color.blue.650}", "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.200}" } } }, "text": { "$value": "{primitive.color.blue.650}", "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.200}" } } } },
+        "2": { "mark": { "$value": "{primitive.color.lime.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.lime.300}" } } }, "text": { "$value": "{primitive.color.lime.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.lime.300}" } } } },
+        "3": { "mark": { "$value": "{primitive.color.pink.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.pink.300}" } } }, "text": { "$value": "{primitive.color.pink.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.pink.300}" } } } },
+        "4": { "mark": { "$value": "{primitive.color.cyan.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.cyan.300}" } } }, "text": { "$value": "{primitive.color.cyan.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.cyan.300}" } } } },
+        "5": { "mark": { "$value": "{primitive.color.violet.600}", "$extensions": { "nova.modes": { "dark": "{primitive.color.violet.400}" } } }, "text": { "$value": "{primitive.color.violet.600}", "$extensions": { "nova.modes": { "dark": "{primitive.color.violet.400}" } } } },
+        "6": { "mark": { "$value": "{primitive.color.fuchsia.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.fuchsia.300}" } } }, "text": { "$value": "{primitive.color.fuchsia.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.fuchsia.300}" } } } }
+      },
+      "chart": {
+        "$description": "차트 계열색 1~6(모드별 — 다크 표면 대비 때문에 밝은 단계). 범례 · 막대 · 선에만, 상태 의미로 쓰지 않는다",
+        "1": { "$value": "{primitive.color.blue.650}", "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.300}" } } },
+        "2": { "$value": "{primitive.color.teal.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.teal.300}" } } },
+        "3": { "$value": "{primitive.color.amber.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.amber.300}" } } },
+        "4": { "$value": "{primitive.color.orange.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.orange.300}" } } },
+        "5": { "$value": "{primitive.color.violet.600}", "$extensions": { "nova.modes": { "dark": "{primitive.color.violet.400}" } } },
+        "6": { "$value": "{primitive.color.pink.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.pink.300}" } } }
+      },
+      "overlay": {
+        "$description": "떠 있는 층 뒤의 막(대화상자 · 폼 모달 배경). 반투명 #RRGGBBAA — neutral.950 에 불투명도 45%(0x73). 글자를 올리지 않으므로 대비 쌍 없음",
+        "scrim": { "$value": "#0D101673" }
+      }
+    },
+    "elevation": {
+      "$type": "shadow",
+      "$description": "그림자 — 카드 · 떠 있는 층(대화상자 · 토스트). 다크 모드는 그림자 대신 경계로 구분되므로 약하게",
+      "card":    { "$value": "0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08)", "$extensions": { "nova.modes": { "dark": "0 1px 2px rgba(0, 0, 0, 0.4)" } } },
+      "overlay": { "$value": "0 12px 32px rgba(16, 24, 40, 0.18)", "$extensions": { "nova.modes": { "dark": "0 12px 32px rgba(0, 0, 0, 0.6)" } } }
+    },
+    "size": {
+      "$type": "dimension",
+      "target": { "$description": "WCAG 2.2 2.5.8(AA) 최소 24px, 모바일 터치는 플랫폼 권고(HIG 44pt · Material 48dp)에 맞춰 44", "web": { "$value": { "value": 24, "unit": "px" } }, "touch": { "$value": { "value": 44, "unit": "px" } } },
+      "control": { "sm": { "$value": { "value": 32, "unit": "px" } }, "md": { "$value": { "value": 40, "unit": "px" } }, "lg": { "$value": { "value": 48, "unit": "px" } } },
+      "content": { "narrow": { "$value": { "value": 860, "unit": "px" } }, "default": { "$value": { "value": 1120, "unit": "px" } }, "wide": { "$value": { "value": 1360, "unit": "px" } } }
+    }
+  },
+  "separation": {
+    "$description": "섞으면 안 되는 의미 색 묶음 짝 — gen_tokens.py check_separation 이 두 모드에서 같은 값 · 같은 원시 참조를 실패로 잡는다(plan_REQ_05 §2)",
+    "$value": [["status", "domain"]]
+  },
+  "contrast": {
+    "$description": "WCAG 2.2 AA 검사 쌍 — gen_tokens.py 가 라이트 · 다크 모두 계산해 미달이면 실패. text=4.5, ui=3.0(큰 글자 · UI 경계 · 포커스)",
+    "$value": [
+      ["text.primary", "bg.canvas", "text"], ["text.primary", "bg.surface", "text"], ["text.primary", "bg.subtle", "text"],
+      ["text.secondary", "bg.canvas", "text"], ["text.secondary", "bg.surface", "text"],
+      ["text.muted", "bg.canvas", "text"], ["text.muted", "bg.surface", "text"], ["text.muted", "bg.subtle", "text"],
+      ["text.brand", "bg.surface", "text"], ["text.brand", "bg.canvas", "text"],
+      ["text.inverse", "bg.inverse", "text"], ["text.inverseMuted", "bg.inverse", "text"],
+      ["action.onPrimary", "action.primary", "text"], ["action.onAccent", "action.accent", "text"], ["action.onDanger", "action.danger", "text"],
+      ["status.infoFg", "status.infoBg", "text"], ["status.successFg", "status.successBg", "text"], ["status.warningFg", "status.warningBg", "text"],
+      ["status.dangerFg", "status.dangerBg", "text"], ["status.linkFg", "status.linkBg", "text"], ["status.neutralFg", "status.neutralBg", "text"],
+      ["border.control", "bg.surface", "ui"], ["border.control", "bg.canvas", "ui"], ["border.focus", "bg.surface", "ui"], ["border.focus", "bg.canvas", "ui"],
+      ["status.onSolid", "status.successSolid", "text"], ["status.onWarningSolid", "status.warningSolid", "text"], ["status.onSolid", "status.dangerSolid", "text"],
+      ["status.onSolid", "status.infoSolid", "text"], ["status.onSolid", "status.neutralSolid", "text"],
+      ["text.onNav", "bg.nav", "text"], ["text.onNavMuted", "bg.nav", "text"], ["text.onNavActive", "bg.navActive", "text"],
+      ["bg.navActive", "bg.nav", "ui"], ["border.focusOnNav", "bg.nav", "ui"],
+      ["ai.fg", "ai.bg", "text"], ["ai.fg", "bg.surface", "text"], ["ai.border", "bg.surface", "ui"],
+      ["domain.1.mark", "bg.surface", "ui"], ["domain.1.mark", "bg.canvas", "ui"], ["domain.1.text", "bg.surface", "text"], ["domain.1.text", "bg.canvas", "text"],
+      ["domain.2.mark", "bg.surface", "ui"], ["domain.2.mark", "bg.canvas", "ui"], ["domain.2.text", "bg.surface", "text"], ["domain.2.text", "bg.canvas", "text"],
+      ["domain.3.mark", "bg.surface", "ui"], ["domain.3.mark", "bg.canvas", "ui"], ["domain.3.text", "bg.surface", "text"], ["domain.3.text", "bg.canvas", "text"],
+      ["domain.4.mark", "bg.surface", "ui"], ["domain.4.mark", "bg.canvas", "ui"], ["domain.4.text", "bg.surface", "text"], ["domain.4.text", "bg.canvas", "text"],
+      ["domain.5.mark", "bg.surface", "ui"], ["domain.5.mark", "bg.canvas", "ui"], ["domain.5.text", "bg.surface", "text"], ["domain.5.text", "bg.canvas", "text"],
+      ["domain.6.mark", "bg.surface", "ui"], ["domain.6.mark", "bg.canvas", "ui"], ["domain.6.text", "bg.surface", "text"], ["domain.6.text", "bg.canvas", "text"],
+      ["chart.1", "bg.surface", "ui"], ["chart.1", "bg.canvas", "ui"], ["chart.2", "bg.surface", "ui"], ["chart.2", "bg.canvas", "ui"], ["chart.3", "bg.surface", "ui"], ["chart.3", "bg.canvas", "ui"], ["chart.4", "bg.surface", "ui"], ["chart.4", "bg.canvas", "ui"], ["chart.5", "bg.surface", "ui"], ["chart.5", "bg.canvas", "ui"], ["chart.6", "bg.surface", "ui"], ["chart.6", "bg.canvas", "ui"]
+    ]
+  }
+}

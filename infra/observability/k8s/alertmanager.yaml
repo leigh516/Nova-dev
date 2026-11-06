@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata: {name: alertmanager}
+spec:
+  selector: {app: alertmanager}
+  ports: [{name: http, port: 9093}]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: alertmanager, labels: {app: alertmanager}}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: alertmanager}}
+  template:
+    metadata: {labels: {app: alertmanager}}
+    spec:
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:v0.28.1
+        args: [--config.file=/etc/alertmanager/alertmanager.yml, --storage.path=/alertmanager]
+        ports: [{name: http, containerPort: 9093}]
+        resources: {requests: {cpu: 10m, memory: 32Mi}, limits: {memory: 96Mi}}
+        volumeMounts:
+        - {name: config, mountPath: /etc/alertmanager}
+        - {name: data, mountPath: /alertmanager}
+      volumes:
+      - {name: config, configMap: {name: alertmanager-config}}
+      - {name: data, emptyDir: {}}

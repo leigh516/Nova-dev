@@ -1,0 +1,107 @@
+# 손으로 관리하는 파일 — 프로젝트 이름을 쓰지 않는다(라벨 part-of 는 생성되는 kustomization 이 붙이고, 접근 허용 NetworkPolicy 는 gen_k3s 가 만든다).
+# Kafka (KRaft combined 모드, ZooKeeper 없음). dev 1 브로커 · prod 오버레이 3 브로커.
+# 자원 효율: 힙 384m, 로그 세그먼트 64MB, 토픽 자동 생성 off(토픽 Job 으로 명시 관리)
+apiVersion: v1
+kind: Service
+metadata: {name: kafka-headless, namespace: infra}
+spec:
+  clusterIP: None
+  selector: {app: kafka}
+  ports: [{name: broker, port: 9092}, {name: controller, port: 9093}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: kafka, namespace: infra, labels: {app: kafka}}
+spec:
+  selector: {app: kafka}
+  ports: [{name: broker, port: 9092}]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: {name: kafka, namespace: infra, labels: {app: kafka}}
+spec:
+  serviceName: kafka-headless
+  replicas: 1
+  podManagementPolicy: Parallel
+  selector: {matchLabels: {app: kafka}}
+  template:
+    metadata: {labels: {app: kafka}}
+    spec:
+      securityContext: {fsGroup: 1000}
+      containers:
+      - name: kafka
+        image: apache/kafka:3.9.1
+        ports: [{name: broker, containerPort: 9092}, {name: controller, containerPort: 9093}]
+        env:
+        - {name: POD_NAME, valueFrom: {fieldRef: {fieldPath: metadata.name}}}
+        - {name: KAFKA_REPLICAS, value: "1"}
+        - {name: CLUSTER_ID, value: "cGxhdGZvcm0ta2Fma2EtMQ"}  # 클러스터마다 1회 고정(kafka-storage.sh random-uuid 로 바꿔도 된다)
+        - {name: KAFKA_HEAP_OPTS, value: "-Xms256m -Xmx384m"}
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          set -e
+          ID=${POD_NAME##*-}
+          VOTERS=""
+          for i in $(seq 0 $((KAFKA_REPLICAS-1))); do VOTERS="${VOTERS:+$VOTERS,}$i@kafka-$i.kafka-headless.infra.svc.cluster.local:9093"; done
+          RF=$(( KAFKA_REPLICAS < 3 ? KAFKA_REPLICAS : 3 ))
+          cat > /tmp/server.properties <<EOP
+          process.roles=broker,controller
+          node.id=$ID
+          controller.quorum.voters=$VOTERS
+          listeners=PLAINTEXT://:9092,CONTROLLER://:9093
+          advertised.listeners=PLAINTEXT://$POD_NAME.kafka-headless.infra.svc.cluster.local:9092
+          controller.listener.names=CONTROLLER
+          listener.security.protocol.map=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+          log.dirs=/var/lib/kafka/data
+          auto.create.topics.enable=false
+          num.partitions=3
+          default.replication.factor=$RF
+          min.insync.replicas=$(( RF > 1 ? 2 : 1 ))
+          offsets.topic.replication.factor=$RF
+          transaction.state.log.replication.factor=$RF
+          transaction.state.log.min.isr=$(( RF > 1 ? 2 : 1 ))
+          log.segment.bytes=67108864
+          log.retention.hours=168
+          group.initial.rebalance.delay.ms=0
+          EOP
+          sed -i 's/^ *//' /tmp/server.properties
+          [ -f /var/lib/kafka/data/meta.properties ] || /opt/kafka/bin/kafka-storage.sh format -t $CLUSTER_ID -c /tmp/server.properties
+          exec /opt/kafka/bin/kafka-server-start.sh /tmp/server.properties
+        resources:
+          requests: {cpu: 100m, memory: 512Mi}
+          limits: {memory: 768Mi}
+        readinessProbe: {tcpSocket: {port: broker}, initialDelaySeconds: 10, periodSeconds: 10}
+        volumeMounts: [{name: data, mountPath: /var/lib/kafka/data}]
+  volumeClaimTemplates:
+  - metadata: {name: data}
+    spec:
+      accessModes: [ReadWriteOnce]
+      storageClassName: local-path
+      resources: {requests: {storage: 5Gi}}
+---
+apiVersion: batch/v1
+kind: Job
+metadata: {name: kafka-topics, namespace: infra}
+spec:
+  backoffLimit: 20
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: topics
+        image: apache/kafka:3.9.1
+        command: ["/bin/bash", "-c"]
+        args:
+        - |
+          set -e
+          B=kafka.infra.svc.cluster.local:9092
+          until /opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server $B >/dev/null 2>&1; do echo waiting; sleep 3; done
+          grep -v '^#' /topics/kafka-topics.txt | while read t p d; do
+            [ -z "$t" ] && continue
+            /opt/kafka/bin/kafka-topics.sh --bootstrap-server $B --create --if-not-exists --topic $t --partitions $p --config retention.ms=$((d*86400000))
+            /opt/kafka/bin/kafka-topics.sh --bootstrap-server $B --create --if-not-exists --topic $t.dlq --partitions 1 --config retention.ms=$((14*86400000))
+          done
+        volumeMounts: [{name: topics, mountPath: /topics}]
+      volumes: [{name: topics, configMap: {name: kafka-topics}}]

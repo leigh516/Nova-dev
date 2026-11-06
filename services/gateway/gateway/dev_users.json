@@ -1,0 +1,27 @@
+{
+  "$comment": "개발 전용 로그인 계정(GW_DEV_LOGIN — 운영에서는 기동 거부). 실제 인증은 /auth 경로를 소유하는 서비스(iam 등)가 생기면 그쪽으로 자동 전환된다. id · tenant 는 UUIDv7(ADR-003).",
+  "password": "nova1234",
+  "users": [
+    {
+      "id": "01a1a19a-d2c9-747b-a454-3bcb1e16a767",
+      "email": "admin@nova.dev",
+      "name": "관리자",
+      "role": "admin",
+      "tenant": "01a1a19a-d2c9-747a-88c3-be2db3217b51"
+    },
+    {
+      "id": "01a1a19a-d2c9-747c-949b-c8bcea66205f",
+      "email": "manager@nova.dev",
+      "name": "책임자",
+      "role": "manager",
+      "tenant": "01a1a19a-d2c9-747a-88c3-be2db3217b51"
+    },
+    {
+      "id": "01a1a19a-d2c9-747d-aaa4-25129915198a",
+      "email": "user@nova.dev",
+      "name": "사용자",
+      "role": "user",
+      "tenant": "01a1a19a-d2c9-747a-88c3-be2db3217b51"
+    }
+  ]
+}

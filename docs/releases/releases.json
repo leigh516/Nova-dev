@@ -1,0 +1,101 @@
+{
+  "releases": [
+    {
+      "version": "0.1.0",
+      "status": "shipped",
+      "goal": "Nova 공통개발플랫폼 첫 판본 — 새 프로젝트를 만들면 첫날부터 test · lint 가 녹색이고, 문서 프로세스 · 공통 코드 · 화면 규칙 · AI 축(SOUL)이 함께 선다",
+      "reqs": [],
+      "exit": [
+        {
+          "id": "E1",
+          "check": "python nova.py test",
+          "expect": "통과",
+          "how": "명령",
+          "judged": ""
+        },
+        {
+          "id": "E2",
+          "check": "python nova.py lint",
+          "expect": "통과",
+          "how": "명령",
+          "judged": ""
+        },
+        {
+          "id": "E3",
+          "check": "python nova.py new-project 로 저장소 밖에 만든 프로젝트에서 install · test · lint 가 녹색",
+          "expect": "녹색",
+          "how": "사람",
+          "judged": "충족 2026-11-04 — 사용자 확인 · 템플릿 리허설 3회(마지막 test 398 · lint 녹색)"
+        },
+        {
+          "id": "E4",
+          "check": "심층 감사 review_261104_01 의 ① 즉시 고침이 모두 처리되고 ② · ⑤ 는 사용자 결정을 받았다",
+          "expect": "처리",
+          "how": "사람",
+          "judged": "충족 2026-11-04 — 사용자 확인 · ① 31건 처리(review_261104_01 §3) · ②⑤ 채택(REQ-261104-10~12)"
+        }
+      ],
+      "not_doing": [
+        "실환경 Kafka · docker compose · k3s 실행 확인(T01-4.08 — Linux/WSL 필요)",
+        "Android · iOS 실기기 빌드(T01-7.07)",
+        "심층 감사 ② 기록 · ⑤ 제안 항목의 구현"
+      ],
+      "drafted": "2026-11-04",
+      "shipped": "2026-11-04",
+      "tag": "v0.1.0",
+      "masterplan": "v1.2"
+    },
+    {
+      "version": "0.2.0",
+      "status": "shipped",
+      "goal": "운영 준비 판본 — 공통 모듈(공통 라이브러리 · 화면 공통 부품 · DB 마이그레이션)을 완성해 병렬 게이트를 열 수 있게 하고, 운영 배포 첫날 사고 5종을 생성물 기본값으로 막는다. nicomms 운영 콘솔 형태를 토큰 · 부품만으로 조립한다",
+      "reqs": [
+        "REQ-261104-10",
+        "REQ-261104-11",
+        "REQ-261104-16"
+      ],
+      "exit": [
+        {
+          "id": "E1",
+          "check": "python nova.py test",
+          "expect": "통과",
+          "how": "명령",
+          "judged": ""
+        },
+        {
+          "id": "E2",
+          "check": "python nova.py lint",
+          "expect": "통과",
+          "how": "명령",
+          "judged": ""
+        },
+        {
+          "id": "E3",
+          "check": "python nova.py parallel-gate",
+          "expect": "공통 영역 7항목 중 실환경을 뺀 6항목이 완료(+증거) — 게이트 사유에 실환경만 남음",
+          "how": "사람",
+          "judged": "충족 2026-11-06 — 실환경 밖 6항목 완료 증거: CI(원격 check 녹색 run 42136792371) · 인증(게이트웨이 JWT · rbac) · DB 마이그레이션(p0001~p0004 · migrate · ADR-011) · 계약(오류 봉투 · 이벤트 봉투 · 대장) · 화면 공통(웹 템플릿 8 · 폼 입력 종류 · 모바일 템플릿 4 · 토큰 킷) · 공통 컴포넌트(nova_common 수명 · 재처리 · 추적 · 방송 · @nova/sdk · kr.nova.shared) · 명명 · 개념 원장. 실환경도 compose E2E 통과. 정본 v1.3 표는 봉인 규칙상 고치지 않고 v1.4 초안에 반영"
+        },
+        {
+          "id": "E4",
+          "check": "묶인 요구 넷의 exit-check",
+          "expect": "REQ-261104-10 · 11 · 16 모두 녹색(12 는 다음 판본)",
+          "how": "사람",
+          "judged": "충족 2026-11-06 — 요구 인덱스 상태 10 · 11 · 16 완료(종료 조건 충족 기록) · 12 는 범위에서 뺌"
+        }
+      ],
+      "not_doing": [
+        "REQ-261104-12 — 남은 task 가 있어 다음 판본(사용자 결정 2026-11-06 '판본을 작게 자주' · REQ-261106-02)",
+        "실제 운영 클러스터 배포 · 복원 리허설(사용자 확인 후 — 판정 불가 목록으로)",
+        "nicomms 미룬 5건(G1 형 축 · G3 그라데이션 · G8 제목 글꼴 · C2 MDI 탭 · C6 밀러 칼럼)",
+        "분산 추적 백엔드 · 메시지 브로커 교체 · 테넌트 전환 서버 API",
+        "Android · iOS 실기기 빌드(T01-7.07) — Android 에뮬레이터 판정(REQ-261104-12 E4)은 SDK 있는 환경에서",
+        "웹 인증 쿠키 전환의 Contract 단계(ADR-014) — 옛 localStorage `<접두어>_token` 키를 지우는 SDK 코드와 웹의 Bearer 경로 제거는 다음 판본에서. 이번 판본은 Expand(게이트웨이 쿠키 발급 · 로그아웃 · CSRF Origin 검사) + Migrate(SDK credentials:include · 토큰 저장 안 함)까지 · 배포 전제는 backend.md §5.1 · 알려진 위험: 로그인 응답 본문의 token 이 브라우저 요청에도 실린다(XSS 가 강제 재로그인을 걸면 탈취 가능 — T04-8.11 중요 1, Contract 에서 Origin 있는 요청은 본문 token 제외 · 🆕 T04-9.12)"
+      ],
+      "drafted": "2026-11-04",
+      "shipped": "2026-11-06",
+      "tag": "v0.2.0",
+      "masterplan": "v1.3"
+    }
+  ]
+}

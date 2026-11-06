@@ -1,0 +1,101 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 운영: 핵심 경로(services.json replicas ≥ 2) 최소 2 레플리카 + PDB, Kafka 3 브로커(RF 3, min.insync 2)
+# 비밀값: 개발 시크릿을 지우고 ExternalSecret(ClusterSecretStore nova-secrets)으로 대체
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: [../../base, ../../../observability, secrets-external.yaml, alertmanager-data.yaml, ingress-tls.yaml, db-provision-job.yaml, mariadb-backup.yaml]
+configMapGenerator:
+- {name: mariadb-init, namespace: infra, behavior: replace, files: [mariadb-init.sql]}
+- {name: alertmanager-config, namespace: observability, behavior: replace, files: [alertmanager.yml]}
+- {name: db-provision, namespace: infra, files: [db-provision.sh]}
+generatorOptions: {disableNameSuffixHash: true}
+patches:
+- path: delete-dev-secrets.yaml
+- target: {kind: ConfigMap, name: nova-common}
+  # GW_TRUSTED_HOPS: 게이트웨이 앞 프록시가 Traefik 하나뿐(P-5) — XFF 오른쪽 1홉을 클라이언트 IP 로 믿는다(레이트리밋 키).
+  # 앞에 L7 LB 를 더 두면 늘려야 한다 — 적으면 모두 LB IP 로 묶이고, 많으면 클라이언트가 위조한 IP 를 믿는다
+  patch: |-
+    - {op: add, path: /data/NOVA_ENV, value: prod}
+    - {op: add, path: /data/GW_TRUSTED_HOPS, value: "1"}
+- target: {kind: Deployment, name: grafana}
+  # 운영 Grafana: 익명 열람 · iframe 임베딩을 끈다(개발 base 는 켬). 이름으로 병합 — env 순서에 기대지 않는다
+  patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata: {name: grafana, namespace: observability}
+    spec:
+      template:
+        spec:
+          containers:
+          - name: grafana
+            env:
+            - {name: GF_AUTH_ANONYMOUS_ENABLED, value: "false"}
+            - {name: GF_SECURITY_ALLOW_EMBEDDING, value: "false"}
+- target: {kind: Deployment, name: alertmanager}
+  # 운영 Alertmanager: 수신처 시크릿은 optional — 아직 없어도 기동하고 게이트웨이 수신은 산다(oncall 만 발송 오류).
+  # data 는 emptyDir 대신 PVC(emptyDir: null 로 지워야 볼륨 소스가 둘이 되지 않는다)
+  patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata: {name: alertmanager, namespace: observability}
+    spec:
+      template:
+        spec:
+          containers:
+          - name: alertmanager
+            volumeMounts:
+            - {name: receivers, mountPath: /etc/alertmanager/receivers, readOnly: true}
+          volumes:
+          - {name: data, emptyDir: null, persistentVolumeClaim: {claimName: alertmanager-data}}
+          - {name: receivers, secret: {secretName: alertmanager-receivers, optional: true}}
+- target: {kind: HorizontalPodAutoscaler, name: "gateway"}
+  patch: |-
+    - {op: replace, path: /spec/minReplicas, value: 2}
+- target: {kind: Deployment, name: "gateway"}
+  patch: |-
+    - {op: replace, path: /spec/replicas, value: 2}
+- target: {kind: StatefulSet, name: kafka}
+  patch: |-
+    - {op: replace, path: /spec/replicas, value: 3}
+    - {op: replace, path: /spec/template/spec/containers/0/env/1/value, value: "3"}
+    - {op: replace, path: /spec/template/spec/containers/0/env/3/value, value: "-Xms512m -Xmx1g"}
+    - {op: replace, path: /spec/template/spec/containers/0/resources, value: {requests: {cpu: 250m, memory: 1Gi}, limits: {memory: 1536Mi}}}
+- target: {kind: Deployment, name: "web-.*"}
+  patch: |-
+    - {op: replace, path: /spec/replicas, value: 2}
+- target: {kind: Ingress, name: nova}
+  # 운영은 HTTPS 만(websecure) · 모든 호스트 TLS · HSTS — http(web) 진입은 Traefik 전역 리다이렉트로(deploy.md 첫 배포 준비)
+  patch: |-
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: nova
+      namespace: edge
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.middlewares: edge-hsts@kubernetescrd
+    spec:
+      tls:
+      - hosts: [api.nova.local, nova.local]
+        secretName: nova-tls
+- target: {kind: Ingress, name: grafana}
+  # 운영은 HTTPS 만(websecure) · 모든 호스트 TLS · HSTS — http(web) 진입은 Traefik 전역 리다이렉트로(deploy.md 첫 배포 준비)
+  patch: |-
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: grafana
+      namespace: observability
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.middlewares: observability-hsts@kubernetescrd
+    spec:
+      tls:
+      - hosts: [grafana.nova.local]
+        secretName: nova-tls
+images:
+- {name: nova/sample, newName: ghcr.io/nicomms6925/nova/sample, newTag: "0.2.0"}
+- {name: nova/gateway, newName: ghcr.io/nicomms6925/nova/gateway, newTag: "0.2.0"}
+- {name: nova/web-app, newName: ghcr.io/nicomms6925/nova/web-app, newTag: "0.2.0"}

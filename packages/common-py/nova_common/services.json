@@ -1,0 +1,16 @@
+{
+  "$comment": "서비스 목록 단일 원천. 추가 · 통합 · 이름 변경은 여기만 고친다(새 서비스는 python nova.py new-service). 읽는 곳: nova.py · devstack · run_local · e2e_kafka · gen_k3s(k3s · helm · compose · prometheus) · local_db_setup · registry · 게이트웨이 라우팅/모니터링. 순서 = 기동 순서(게이트웨이는 마지막). routes = 게이트웨이 /v1 아래 경로 접두어. package = 파이썬 패키지 이름(표준 모듈과 겹칠 때만). k8s.allow_from = 이 서비스를 직접 불러도 되는 다른 서비스 이름 목록(선택 · 기본 없음 = 게이트웨이만 — 운영 NetworkPolicy 가 그 밖을 막는다).",
+  "groups": [
+    {"key": "gateway", "name": "게이트웨이"},
+    {"key": "platform", "name": "플랫폼"},
+    {"key": "business", "name": "업무"},
+    {"key": "capability", "name": "역량"}
+  ],
+  "services": [
+    {"name": "sample", "title": "샘플", "group": "business", "desc": "플랫폼 동작 예시 — 항목 CRUD · 이벤트 발행/소비", "scope": "SAMPLE", "local_port": 8001,
+     "routes": ["/sample"],
+     "k8s": {"namespace": "core", "tier": "business", "kafka": true, "db": true, "cpu": "25m", "memory": "96Mi", "memory_limit": "256Mi", "hpa_max": 3, "replicas": 1}},
+    {"name": "gateway", "title": "게이트웨이", "group": "gateway", "desc": "유일한 진입점 — JWT · 권한 · 레이트리밋 · 라우팅 · 모니터링", "scope": "GW", "local_port": 8080, "gateway": true,
+     "k8s": {"namespace": "edge", "tier": "edge", "kafka": true, "db": false, "cpu": "50m", "memory": "96Mi", "memory_limit": "256Mi", "hpa_max": 6, "replicas": 2}}
+  ]
+}

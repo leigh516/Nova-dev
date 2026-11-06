@@ -1,0 +1,84 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 운영 MariaDB 일일 백업 — 덤프 파일은 같은 노드의 PVC mariadb-backup 에 7일 보관.
+# 노드 밖 복사 · 복원 순서는 docs/conventions/deploy.md §백업 · 복원. 실패한 Job 은 지우지 않고 남기고, 실패하면 Alertmanager 에
+# critical 경보 MariaDBBackupFailed 를 직접 보낸다(성공하면 해제). 일정 자체가 안 돈 경우는 경보가 없다 — '매일 확인'으로 본다
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-backup
+  namespace: infra
+  labels: {app: mariadb-backup}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources: {requests: {storage: 10Gi}}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mariadb-backup
+  namespace: infra
+  labels: {app: mariadb-backup}
+spec:
+  schedule: "0 3 * * *"
+  timeZone: Asia/Seoul
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels: {app: mariadb-backup}
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext: {runAsNonRoot: true, runAsUser: 999, runAsGroup: 999, fsGroup: 999, seccompProfile: {type: RuntimeDefault}}
+          containers:
+          - name: backup
+            image: mariadb:11.4
+            command: [bash, -c]
+            args:
+            - |
+              set -euo pipefail
+              am_alert() {  # $1 = firing | resolved
+                local now end body resp
+                now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                end="$now"
+                if [ "$1" = firing ]; then end="$(date -u -d '+26 hours' +%Y-%m-%dT%H:%M:%SZ)"; fi
+                body='[{"labels":{"alertname":"MariaDBBackupFailed","severity":"critical","service":"mariadb-backup","namespace":"infra"},"annotations":{"summary":"MariaDB 일일 백업 실패","runbook":"kubectl -n infra logs job/<최근 Job> — deploy.md 백업 · 복원"},"startsAt":"'"$now"'","endsAt":"'"$end"'"}]'
+                exec 3<>"/dev/tcp/$AM_HOST/$AM_PORT" || return 1
+                printf 'POST /api/v2/alerts HTTP/1.0\r\nHost: %s\r\nContent-Type: application/json\r\nContent-Length: %s\r\n\r\n%s' "$AM_HOST" "$(printf '%s' "$body" | wc -c)" "$body" >&3
+                IFS= read -r resp <&3 || resp=""
+                exec 3<&-
+                case "$resp" in
+                  "HTTP/"*" 200"*) echo "✓ 경보 $1 전송" ;;
+                  *) echo "✗ Alertmanager 응답: ${resp:-없음}" >&2; return 1 ;;
+                esac
+              }
+              trap 'rc=$?; am_alert firing || echo "✗ 백업 실패 경보를 보내지 못했다 — Job Failed 로만 남는다" >&2; exit "$rc"' ERR
+              f="/backup/mariadb-$(date +%Y%m%d-%H%M%S).sql.gz"
+              mariadb-dump --protocol=tcp -h "$DB_HOST" -u root --single-transaction --databases sample | gzip > "$f.partial"
+              mv "$f.partial" "$f"
+              echo "✓ 백업 $f ($(du -h "$f" | cut -f1))"
+              find /backup -maxdepth 1 -name 'mariadb-*.sql.gz*' -mmin +10080 -print -delete
+              # 해제 전송 실패는 경고로만 둔다 — 백업은 이미 성공했고, 경보는 endsAt(26시간)에 저절로 풀린다
+              am_alert resolved || echo "△ 경보 해제를 보내지 못했다(백업은 성공)" >&2
+            env:
+            - {name: MYSQL_PWD, valueFrom: {secretKeyRef: {name: mariadb-root, key: password}}}
+            - {name: DB_HOST, value: mariadb.infra.svc.cluster.local}
+            - {name: TZ, value: Asia/Seoul}
+            - {name: AM_HOST, value: alertmanager.observability.svc.cluster.local}
+            - {name: AM_PORT, value: "9093"}
+            resources:
+              requests: {cpu: 50m, memory: 64Mi}
+              limits: {memory: 256Mi}
+            securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+            volumeMounts:
+            - {name: backup, mountPath: /backup}
+            - {name: tmp, mountPath: /tmp}
+          volumes:
+          - {name: backup, persistentVolumeClaim: {claimName: mariadb-backup}}
+          - {name: tmp, emptyDir: {sizeLimit: 16Mi}}

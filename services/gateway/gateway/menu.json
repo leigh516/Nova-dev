@@ -1,0 +1,12 @@
+{
+  "$comment": "메뉴(채널별) — 호출자 권한(perm)이 있는 항목만 /v1/menu 로 나간다. features = 기능 플래그(파일 모드: 항상 켜짐). 운영에서 플래그 서비스를 두면 GW_FLAGS_SERVICE=<서비스> 의 /internal/features 를 쓴다(같은 모양: key · label · enabled · api_prefixes · maintenance_msg).",
+  "items": [
+    {"key": "home",   "label": "홈",     "icon": "home", "path": "/",              "channels": ["web", "app"], "perm": null},
+    {"key": "items",  "label": "항목",   "icon": "list", "path": "/items",         "channels": ["web", "app"], "perm": "sample.read"},
+    {"key": "design", "label": "디자인", "icon": "palette", "path": "/design",    "channels": ["web"],        "perm": null},
+    {"key": "ops",    "label": "운영",   "icon": "activity", "path": "/ops",       "channels": ["web"],        "perm": "ops.read"}
+  ],
+  "features": [
+    {"key": "sample", "label": "샘플", "enabled": true, "api_prefixes": ["/sample"], "maintenance_msg": ""}
+  ]
+}

@@ -1,0 +1,74 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sample
+  namespace: core
+  labels: {app: sample, nova.dev/tier: business}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector: {matchLabels: {app: sample}}
+  strategy: {type: RollingUpdate, rollingUpdate: {maxSurge: 1, maxUnavailable: 0}}
+  template:
+    metadata:
+      labels: {app: sample, nova.dev/tier: business}
+      annotations: {prometheus.io/scrape: "true", prometheus.io/port: "8000", prometheus.io/path: /metrics}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 10001, seccompProfile: {type: RuntimeDefault}}
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: app
+        image: nova/sample:dev
+        imagePullPolicy: IfNotPresent
+        ports: [{name: http, containerPort: 8000}]
+        envFrom:
+        - configMapRef: {name: nova-common}
+        env:
+        - name: JWT_SECRET
+          valueFrom: {secretKeyRef: {name: nova-auth, key: jwt-secret}}
+        - name: DATABASE_URL_SAMPLE
+          valueFrom: {secretKeyRef: {name: nova-db-sample, key: url}}
+        resources:
+          requests: {cpu: 25m, memory: 96Mi}
+          limits: {memory: 256Mi}
+        readinessProbe: {httpGet: {path: /readyz, port: http}, periodSeconds: 5, failureThreshold: 3}
+        livenessProbe: {httpGet: {path: /healthz, port: http}, initialDelaySeconds: 15, periodSeconds: 15}
+        startupProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 2, failureThreshold: 30}
+        securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+        volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {sizeLimit: 64Mi}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sample
+  namespace: core
+spec:
+  selector: {app: sample}
+  ports: [{name: http, port: 8000, targetPort: http}]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: sample
+  namespace: core
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: Deployment, name: sample}
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource: {name: cpu, target: {type: Utilization, averageUtilization: 70}}
+  behavior:
+    scaleDown: {stabilizationWindowSeconds: 300}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: sample
+  namespace: core
+spec:
+  maxUnavailable: 1
+  selector: {matchLabels: {app: sample}}

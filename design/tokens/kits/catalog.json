@@ -1,0 +1,22 @@
+{
+  "kits": [
+    {
+      "id": "nova",
+      "label": "Nova 기본",
+      "desc": "인디고 브랜드 · 중립 회색 바탕 · 살짝 둥근 모서리 — 모든 새 프로젝트의 시작 모습",
+      "tokens": null,
+      "preview": { "hex": "#4F5BD5", "radius": "md", "gap": "2", "dark": false },
+      "gaps": [],
+      "status": "기본"
+    },
+    {
+      "id": "newtype",
+      "label": "newtype — 초록 콘솔",
+      "desc": "밝은 초록 회색 바탕 · 짙은 초록 사이드바 · 초록 강조색의 운영 콘솔(상담 · 관제 화면). 원본(첨부 assets.zip, sha256 4e0406bc…) newtype.css 의 색 · 반경만 옮겼다(경계선은 대비 3:1 로 조정)",
+      "tokens": "newtype.tokens.json",
+      "preview": { "hex": "#1E7A5A", "radius": "md", "gap": "2", "dark": false },
+      "gaps": ["datepick", "daterange"],
+      "status": "채택 가능"
+    }
+  ]
+}

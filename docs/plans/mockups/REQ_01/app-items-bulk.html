@@ -1,0 +1,22 @@
+<!-- mockup: {"app": "app", "active": "/items", "title": "항목 — 일괄 보관(예시 목업)", "width": 1280, "extra_links": [["/items/archive", "보관함", ""]]} -->
+<div class="content default">
+  <div class="page-header">
+    <div><h1>항목</h1><p class="desc">여러 항목을 골라 한 번에 보관할 수 있습니다(예시 목업 — mockup_shots 동작 확인용).</p></div>
+    <div class="row"><a class="btn primary">새 항목</a></div>
+  </div>
+  <div class="row mock-new" style="margin-bottom:12px;padding:8px">
+    <span class="badge info">2개 선택됨</span>
+    <button class="btn secondary sm">선택 보관</button>
+    <button class="btn ghost sm">선택 해제</button>
+  </div>
+  <div class="card flush">
+    <table class="table">
+      <thead><tr><th class="mock-new">선택</th><th>이름</th><th>상태</th><th>만든 때</th></tr></thead>
+      <tbody>
+        <tr><td><input type="checkbox" checked aria-label="선택"></td><td>회의실 예약 규칙</td><td><span class="badge success">사용 중</span></td><td>3분 전</td></tr>
+        <tr><td><input type="checkbox" checked aria-label="선택"></td><td>분기 보고서</td><td><span class="badge success">사용 중</span></td><td>1시간 전</td></tr>
+        <tr><td><input type="checkbox" aria-label="선택"></td><td>지난 계약 메모</td><td><span class="badge">보관됨</span></td><td>어제</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

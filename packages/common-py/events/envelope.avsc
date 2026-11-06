@@ -1,0 +1,69 @@
+{
+  "type": "record",
+  "namespace": "nova.events",
+  "name": "Envelope",
+  "doc": "모든 Kafka 메시지 공통 봉투(nova_common.events.Envelope 와 동일). data 는 토픽별 스키마(JSON 직렬화).",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "type",
+      "type": "string",
+      "doc": "토픽 이름 = 이벤트 타입 (svc.entity.verb)"
+    },
+    {
+      "name": "source",
+      "type": "string",
+      "doc": "발행 서비스"
+    },
+    {
+      "name": "key",
+      "type": "string",
+      "doc": "파티션 키 = 집계 ID"
+    },
+    {
+      "name": "idempotency_key",
+      "type": "string",
+      "doc": "소비 측 중복 제거 키 — processed_event(consumer, idempotency_key). 기본값 {source}:{topic}:{key}:{event_id}(이벤트마다 다름), 업무 단위 중복 제거는 발행 쪽이 명시(ADR-012)"
+    },
+    {
+      "name": "occurred_at",
+      "type": "string",
+      "doc": "ISO-8601 UTC"
+    },
+    {
+      "name": "version",
+      "type": "int"
+    },
+    {
+      "name": "trace_id",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null
+    },
+    {
+      "name": "tenant",
+      "type": [
+        "null",
+        "string"
+      ],
+      "default": null,
+      "doc": "발행 시점 테넌트(STD-TENANCY-001)"
+    },
+    {
+      "name": "actor_type",
+      "type": "string",
+      "default": "human",
+      "doc": "human | ai | system (STD-AX-001)"
+    },
+    {
+      "name": "data",
+      "type": "string",
+      "doc": "토픽별 페이로드(JSON). 아래 *.avsc 참조"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "version": "0.1",
+  "status": "초안",
+  "approved": {"by": "", "date": ""},
+  "sources": ["docs/product/intake.json", "INT-YYMMDD-NN", "REQ-YYMMDD-NN"],
+  "product": {
+    "name": "(제품 이름)",
+    "one_liner": "(누가 · 무엇을 · 왜 — 한 문장)",
+    "background": "(지금은 어떻게 하고 있고 무엇이 문제인가)",
+    "why_now": "(왜 지금인가)"
+  },
+  "goals": ["(할 것)"],
+  "non_goals": ["(하지 않을 것)"],
+  "anti_goals": ["(기술적으로 돌아가도 실패인 것)"],
+  "success_metrics": [{"id": "M-01", "metric": "(지표)", "target": "(숫자 목표)"}],
+  "users": [{"id": "U-01", "role": "(역할)", "description": "(누구 · 숙련도)", "devices": "(기기 · 장소)"}],
+  "features": [
+    {
+      "id": "F-001",
+      "title": "(기능 이름)",
+      "description": "(무엇을 · 언제 · 누가)",
+      "priority": "필수",
+      "users": ["U-01"],
+      "sources": ["prd/고객_기획서_v1.pdf#E-001", "INT-YYMMDD-NN"],
+      "acceptance": [
+        {"id": "F-001-AC1", "criterion": "(확인 가능한 기준 — 숫자 · 장면)", "test": "(확인 방법 — 자동 테스트 · 화면 스모크 · 사람 확인)"}
+      ]
+    }
+  ],
+  "nfr": [{"id": "N-01", "category": "성능", "requirement": "(요구)", "acceptance": "(확인 가능한 기준)"}],
+  "constraints": ["(바꿀 수 없는 것 — 기존 DB · 연동 규격 · 일정 · 예산)"],
+  "assumptions": [{"text": "(고객이 말하지 않았지만 정한 것)", "by": "Claude 판단"}],
+  "open_questions": [{"id": "Q-01", "question": "(질문)", "owner": "고객", "due": "", "answer": ""}]
+}

@@ -1,0 +1,22 @@
+{
+  "$comment": "생성물 원장 스캐너 설정 — 무엇을 '생성물'로 보고 어디서 찾는가. 엔진은 scripts/registry.py. ID = <kind>-<scope>-NNNN. 새 종류를 추가하면 kinds 와 scanners 에 한 줄씩. 스캐너 type: services(서비스 · 웹 앱) · service_regex(서비스 파이썬 코드에서 정규식, scope = 서비스 scope) · glob_regex(파일 글롭 + 정규식, 고정 scope) · web_pages(Next.js app 라우터 page.tsx, scope = 웹 앱 scope) · lines(줄 첫 단어). template: {n} = 정규식 그룹, {n!u} = 대문자, {prefix} = APIRouter 접두어.",
+  "kinds": {
+    "SVC": "서비스 · 앱",
+    "TBL": "DB 테이블",
+    "API": "API",
+    "EVT": "이벤트 토픽",
+    "SCR": "화면",
+    "CMP": "UI 컴포넌트"
+  },
+  "scanners": [
+    {"kind": "SVC", "type": "services", "scope": "SYS"},
+    {"kind": "TBL", "type": "service_regex", "regex": "__tablename__\\s*=\\s*\"([a-z_0-9]+)\"", "template": "{0}",
+     "infra_tables": ["outbox", "processed_event"], "infra_loc": "packages/common-py/nova_common/db.py"},
+    {"kind": "API", "type": "service_regex", "regex": "@(?:app|router)\\.(get|post|put|patch|delete)\\(\\s*\"([^\"]*)\"", "template": "{0!u} {prefix}{1}",
+     "prefix_regex": "APIRouter\\(\\s*prefix\\s*=\\s*\"([^\"]+)\""},
+    {"kind": "SCR", "type": "web_pages", "root": "web/apps/{app}/app"},
+    {"kind": "CMP", "type": "glob_regex", "scope": "UI", "glob": "web/packages/ui/src/**/*.tsx", "regex": "^export function ([A-Z]\\w*)"},
+    {"kind": "CMP", "type": "glob_regex", "scope": "UIKIT", "glob": "apps/kmp/uikit/src/**/*.kt", "regex": "@Composable\\s+(?:public\\s+)?fun ([A-Z]\\w*)"},
+    {"kind": "EVT", "type": "lines", "scope": "KAFKA", "file": "infra/k3s/base/kafka-topics.txt"}
+  ]
+}

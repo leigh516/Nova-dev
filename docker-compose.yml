@@ -1,0 +1,93 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 개발 전체 스택: docker compose up -d --build   (게이트웨이 http://localhost:8080/v1 · Grafana http://localhost:3300 · Prometheus :9090)
+name: nova
+x-svc: &svc
+  build: {context: ., dockerfile: infra/docker/Dockerfile.service}
+  restart: unless-stopped
+  environment: &env
+    KAFKA_BOOTSTRAP: kafka:9092
+    PROMETHEUS_URL: http://prometheus:9090
+    NOVA_PACKS: ""
+    NOVA_SUPER_ROLE: "admin"
+    NOVA_TZ_OFFSET_HOURS: "9"
+    SVC_SAMPLE_URL: http://sample:8000
+  depends_on:
+    kafka-topics: {condition: service_completed_successfully}
+    mariadb: {condition: service_healthy}
+  mem_limit: 320m
+
+services:
+  kafka:
+    image: apache/kafka:3.9.1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_HEAP_OPTS: -Xms256m -Xmx384m
+    volumes: [kafka-data:/var/lib/kafka/data]
+    mem_limit: 768m
+    healthcheck: {test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"], interval: 5s, retries: 30}
+  kafka-topics:
+    image: apache/kafka:3.9.1
+    depends_on: {kafka: {condition: service_healthy}}
+    volumes: [./infra/k3s/base/kafka-topics.txt:/topics.txt:ro]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+    - |
+      grep -v '^#' /topics.txt | while read t p d; do
+        [ -z "$$t" ] && continue
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic $$t --partitions $$p --config retention.ms=$$((d*86400000))
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic $$t.dlq --partitions 1
+      done
+  mariadb:
+    image: mariadb:11.4
+    environment: {MARIADB_ROOT_PASSWORD: dev-root-pw}
+    command: [--innodb-buffer-pool-size=128M, --performance-schema=OFF, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci]
+    volumes: [maria-data:/var/lib/mysql, ./infra/k3s/base/mariadb-init.sql:/docker-entrypoint-initdb.d/init.sql:ro]
+    healthcheck: {test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"], interval: 5s, retries: 30}
+    mem_limit: 512m
+
+  sample:
+    <<: *svc
+    build: {context: ., dockerfile: infra/docker/Dockerfile.service, args: {SERVICE: sample}}
+    environment: {<<: *env, DATABASE_URL_SAMPLE: "mysql+pymysql://sample:dev-sample-pw@mariadb:3306/sample?charset=utf8mb4"}
+  gateway:
+    <<: *svc
+    build: {context: ., dockerfile: infra/docker/Dockerfile.service, args: {SERVICE: gateway}}
+    ports: ["8080:8000"]
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    command: [--config.file=/etc/prometheus/prometheus.compose.yml, --storage.tsdb.retention.time=3d, --web.enable-lifecycle]
+    volumes: [./infra/observability/prometheus:/etc/prometheus:ro]
+    ports: ["9090:9090"]
+    mem_limit: 512m
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    volumes: [./infra/observability/alertmanager:/etc/alertmanager:ro]
+    command: [--config.file=/etc/alertmanager/alertmanager.compose.yml]
+    mem_limit: 96m
+  grafana:
+    image: grafana/grafana:11.3.0
+    environment:
+      PROMETHEUS_URL: http://prometheus:9090
+      GF_SECURITY_ADMIN_PASSWORD: grafana-dev-pw
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/platform-overview.json
+    volumes:
+    - ./infra/observability/grafana/provisioning:/etc/grafana/provisioning:ro
+    - ./infra/observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports: ["3300:3000"]
+    mem_limit: 256m
+
+volumes: {kafka-data: {}, maria-data: {}}

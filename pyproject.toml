@@ -1,0 +1,27 @@
+# 저장소 루트 — uv 워크스페이스 (가상환경 · 의존성 · 잠금 파일 단일 관리)
+#   uv sync          .venv 생성 + 잠금(uv.lock) 기준 설치
+#   uv run pytest    가상환경에서 실행
+#   uv add <pkg>     의존성 추가(공통 라이브러리는 --package nova-common)
+[project]
+name = "nova-dev"
+version = "0.1.0"
+description = "Nova 공통개발플랫폼 저장소 루트(워크스페이스)"
+requires-python = ">=3.12"
+dependencies = ["nova-common"]
+
+[dependency-groups]
+dev = [
+    "playwright",
+    "pytest>=8",
+    "pytest-xdist>=3.6",
+    "pyyaml>=6",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/common-py"]
+
+[tool.uv.sources]
+nova-common = { workspace = true }

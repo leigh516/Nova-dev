@@ -1,0 +1,17 @@
+{
+  "min_repeats": 3,
+  "rules": [
+    {"id": "korean", "label": "한국어로 대화 · 기록", "target": "STYLE.md 언어 · CLAUDE.md 규칙 0 · persona_guard.py",
+     "patterns": ["한국어로", "한국어로 해", "영어로 (대화|답변)", "규칙을 어기"]},
+    {"id": "conclusion_first", "label": "결론 먼저 · 짧게", "target": "STYLE.md 응답 형식 · 길이",
+     "patterns": ["결론(부터|만|먼저)", "간단히", "짧게", "요약(만|해)"]},
+    {"id": "no_confirm", "label": "묻지 말고 진행", "target": "STYLE.md 속도 표시 · SOUL.md 되돌림 원칙",
+     "patterns": ["묻지 말고", "확인 없이", "그냥 (해|진행)", "계속 진행", "작업을 계속"]},
+    {"id": "verify", "label": "실제로 확인 · 증거", "target": "SOUL.md 증거로 말한다 · superpowers verification-before-completion",
+     "patterns": ["확인(해|했)", "테스트(해|를)", "실제로 (돌려|실행)", "검증"]},
+    {"id": "explain", "label": "쉽게 설명 · 보여 주기", "target": "STYLE.md 응답 형식(그림 · 비유) · USER.md",
+     "patterns": ["쉽게", "설명을", "보여(줘|주세요|주고)", "알기 쉽"]},
+    {"id": "follow_reference", "label": "원본을 충분히 반영", "target": "IDENTITY.md · 작업 방식",
+     "patterns": ["원본(에|의|과)", "충분히 반영", "참조해서", "우리 ?시스템에 맞게"]}
+  ]
+}

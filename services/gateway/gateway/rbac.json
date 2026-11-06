@@ -1,0 +1,42 @@
+{
+  "$comment": "역할 → 권한 표(파일 모드). 권한키 = <모듈>.<행위>. 모듈 = services.json 의 perm(없으면 서비스 이름), 행위 = HTTP 메서드(GET=read · POST=create · PUT/PATCH=update · DELETE=delete) 또는 overrides. '*' 는 모든 권한, 'sample.*' 는 모듈 전체. guest = 로그인하지 않은 호출자(공개 API 는 guest 에 권한을 준다). 운영에서 IAM 서비스가 생기면 GW_RBAC_SERVICE=<서비스> 로 그 서비스의 /internal/rbac 를 쓴다(같은 모양).",
+  "roles": {
+    "guest": {
+      "name": "비로그인",
+      "perms": [
+        "sample.read"
+      ]
+    },
+    "user": {
+      "name": "일반 사용자",
+      "perms": [
+        "sample.read",
+        "sample.create",
+        "sample.update"
+      ]
+    },
+    "manager": {
+      "name": "관리책임자",
+      "perms": [
+        "sample.*",
+        "ops.read"
+      ]
+    },
+    "admin": {
+      "name": "관리자",
+      "perms": [
+        "*"
+      ]
+    }
+  },
+  "overrides": [
+    {
+      "pattern": "^/sample/items/[^/]+/archive$",
+      "action": "update"
+    },
+    {
+      "pattern": "^/sample/items/[^/]+/restore$",
+      "action": "update"
+    }
+  ]
+}

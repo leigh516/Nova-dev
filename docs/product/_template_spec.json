@@ -1,0 +1,58 @@
+{
+  "version": "0.1",
+  "status": "초안",
+  "approved": {"by": "", "date": ""},
+  "prd_version": "0.1",
+  "foundation": {
+    "stack": {
+      "frontend": {"choice": "Next.js 15 + React 19 + TypeScript (@nova/ui · @nova/sdk)", "reason": "Nova 기본 — 화면 3층 구조 · 토큰 · 스모크가 준비됨"},
+      "backend": {"choice": "Python 3.12 + FastAPI (nova_common)", "reason": "Nova 기본 — 서비스 팩토리 · 아웃박스 · 권한 · 메트릭"},
+      "mobile": {"choice": "Kotlin Multiplatform + Compose (kr.nova.uikit)", "reason": "(쓰지 않으면 choice 를 '없음'으로 하고 이유)"}
+    },
+    "architecture": {"style": "모듈러 모놀리스", "deploy": "k3s(dev/prod 오버레이) · docker-compose(로컬)", "reason": "(팀 규모 · 운영 성숙도 · 분리 계획)"},
+    "database": {"engine": "MariaDB 11 (서비스별 DB)", "migration": "개발: create_all · 운영: Alembic", "reason": "(이유)"},
+    "crosscutting": [
+      {"concern": "인증", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "인가 · 권한", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "화면 셸 · 메뉴", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "디자인 시스템", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "오류 표준", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "로깅 · 감사", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "관측성", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "이벤트 · 메시징", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "목록 · 검색 · 페이지", "decision": "내장 채택", "asset": "", "reason": ""},
+      {"concern": "다국어(i18n)", "decision": "미사용", "asset": "", "reason": "(한국어만 — 해외 사용자 계획 없음)"},
+      {"concern": "파일 · 첨부", "decision": "미사용", "asset": "", "reason": "(이유)"}
+    ],
+    "adr": ["ADR-NNN"]
+  },
+  "services": [{"name": "order", "group": "core", "responsibility": "(이 서비스가 책임지는 것)", "features": ["F-001"]}],
+  "data_model": [
+    {
+      "entity": "order_item",
+      "service": "order",
+      "description": "(이 표가 담는 것)",
+      "columns": [
+        {"name": "title", "type": "string(200)", "nullable": false, "comment": "(칸의 의미)", "ref": ""},
+        {"name": "customer_id", "type": "ref", "nullable": false, "comment": "(누구의 것인지)", "ref": "customer.id"}
+      ]
+    }
+  ],
+  "api": [
+    {
+      "id": "API-01",
+      "method": "GET",
+      "path": "/v1/orders",
+      "service": "order",
+      "permission": "order.read",
+      "features": ["F-001"],
+      "request": "(쿼리 · 본문 — 목록이면 paging 계약)",
+      "response": "(응답 모양)",
+      "errors": ["NOT_FOUND", "FORBIDDEN"]
+    }
+  ],
+  "events": [{"topic": "order.item.created", "producer": "order", "consumers": ["(구독 서비스)"], "payload": "(id · tenant · actor_type + 필드)"}],
+  "screens": [{"id": "S-01", "name": "(화면 이름)", "app": "app", "route": "/orders", "template": "ListPage", "features": ["F-001"]}],
+  "test_map": [{"acceptance": "F-001-AC1", "test": "services/order/tests/test_orders.py::test_list_first_page"}],
+  "open_questions": [{"id": "Q-01", "question": "(질문)", "owner": "고객", "answer": ""}]
+}

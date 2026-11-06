@@ -1,0 +1,24 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+project: nova
+image: {registry: ghcr.io/nicomms6925/nova, tag: "0.2.0", pullPolicy: IfNotPresent}
+kafkaBootstrap: kafka.infra.svc.cluster.local:9092
+prometheusUrl: http://prometheus.observability.svc.cluster.local:9090
+# 운영 안전장치(k3s overlays/prod 와 같다): NOVA_ENV=prod 면 기본 JWT 키 · 켜진 개발 기능이 있을 때 서비스가 기동 거부
+env: prod
+jwtSecret: {name: nova-auth, key: jwt-secret}  # 서비스 네임스페이스마다 미리 만든다(ExternalSecret 등) — 차트는 비밀값을 만들지 않는다
+packs: ""
+corsOrigins: "https://nova.local"
+# 게이트웨이가 믿는 프록시 홉 수(P-5) — 1 = 앞에 인그레스 컨트롤러 하나. 앞에 L7 LB 를 더 두면 2. 비우면 0(XFF 무시)
+trustedHops: "1"
+# 서비스 단위 NetworkPolicy(k3s base networkpolicy.yaml 과 같은 정책) — 서비스는 게이트웨이가 붙인 x-user-id · x-role 을 믿으므로
+# 끄면 아무 파드나 그 헤더로 서비스를 직접 부를 수 있다. 차트는 네임스페이스를 만들지 않으므로 자동 라벨 kubernetes.io/metadata.name 으로 고른다
+networkPolicy:
+  enabled: true
+  namespaces: [edge, core]  # 기본 거부(default-deny-ingress)를 둘 서비스 네임스페이스
+  ingressNamespace: kube-system        # 인그레스 컨트롤러(Traefik) — 게이트웨이만 받는다
+  observabilityNamespace: observability  # 그 안에서 서비스별 observedBy 파드(app 라벨)만 들인다 — 네임스페이스 통째 허용 없음
+# 서비스 목록 하나로 Deployment · Service · HPA · PDB · NetworkPolicy 렌더(ingressFrom = 직접 호출을 받을 파드, services.json k8s.allow_from ·
+# observedBy = 이 서비스를 부르는 관측 파드 — 백엔드는 prometheus, 게이트웨이는 + alertmanager)
+services:
+  sample:  {namespace: core, replicas: 1, hpaMax: 3, cpu: 25m, memory: 96Mi, memoryLimit: 256Mi, db: true, ingressFrom: [{namespace: edge, app: gateway}], observedBy: [prometheus]}
+  gateway: {namespace: edge, replicas: 2, hpaMax: 6, cpu: 50m, memory: 96Mi, memoryLimit: 256Mi, db: false, gateway: true, ingressFrom: [], observedBy: [prometheus, alertmanager]}

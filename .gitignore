@@ -1,0 +1,39 @@
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.pytest_tmp/
+*.egg-info/
+.venv/
+# 로컬 데이터·실행 상태
+data/
+*.db
+*.db-wal
+*.db-shm
+.run/
+.env
+# node / next
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+# gradle / kmp
+.gradle/
+.kotlin/
+build/
+local.properties
+# ide / os
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+# superpowers — 시각 도우미 화면 · 실행 원장(커밋 안 함, docs/conventions/superpowers.md)
+.superpowers/
+.worktrees/
+.collab/
+# 실행 스택 상태 · 로그(python nova.py stack — 기계마다 로컬)
+.stack/
+.claude/worktrees/
+# 훅 기록 · 스냅샷(.claude/hooks/nova_hooks.py — 기계마다 로컬, REQ-261105-07)
+.claude/state/

@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "files": [
+    {
+      "path": "prd/고객_기획서_v1.pdf",
+      "category": "prd",
+      "sha256": "(warehouse.py scan --write 가 채운다)",
+      "size": 0,
+      "status": "분석됨",
+      "analyzed": "2026-11-04",
+      "summary": "(이 파일이 말하는 것을 3~5줄로)",
+      "findings": [
+        {
+          "id": "E-001",
+          "area": "기능",
+          "kind": "요구",
+          "text": "(무엇을 알아냈나 — 우리 말로)",
+          "quote": "(원문 그대로 인용, 쪽 · 절)"
+        }
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "id": "G-001",
+      "area": "비기능",
+      "question": "(고객에게 물을 질문 — 고객 말로)",
+      "why": "(왜 필요한가 — 이 답에 따라 무엇이 달라지나)",
+      "status": "열림",
+      "answer": "",
+      "interview": ""
+    }
+  ]
+}

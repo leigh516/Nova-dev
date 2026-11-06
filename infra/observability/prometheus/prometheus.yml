@@ -1,0 +1,22 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# Prometheus — k3s 용: 파드 어노테이션(prometheus.io/scrape) 기반 SD. compose 는 prometheus.compose.yml
+# 자원 효율: 스크레이프 15s, 고카디널리티 라벨(route 외 경로) 금지 규약
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels: {cluster: nova}
+rule_files:
+- /etc/prometheus/*rules*.yml   # recording_rules(손) · alert_rules(생성) · business_rules(손, 프로젝트 업무)
+alerting:
+  alertmanagers:
+  - static_configs: [{targets: ["alertmanager:9093"]}]
+scrape_configs:
+- job_name: pods
+  kubernetes_sd_configs: [{role: pod, namespaces: {names: [edge, core]}}]
+  relabel_configs:
+  - {source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape], action: keep, regex: "true"}
+  - {source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port], action: replace, regex: '([^:]+)(?::\d+)?;(\d+)', replacement: '$1:$2', target_label: __address__}
+  - {source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path], action: replace, target_label: __metrics_path__, regex: (.+)}
+  - {source_labels: [__meta_kubernetes_pod_label_app], target_label: job}
+  - {source_labels: [__meta_kubernetes_namespace], target_label: namespace}
+  - {source_labels: [__meta_kubernetes_pod_name], target_label: pod}

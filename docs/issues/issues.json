@@ -1,0 +1,30 @@
+{
+  "issues": [
+    {
+      "id": "ISS-261105-01",
+      "kind": "defect",
+      "grade": "P2",
+      "status": "triaged",
+      "title": "메모리 DB(sqlite:// StaticPool)에서 배경 스레드의 연결 반납 ROLLBACK 이 다른 스레드의 커밋 전 쓰기를 지운다 — 삭제 204 뒤 항목이 다시 보임",
+      "repro": "부하 중 services/sample/tests/test_items.py::test_ai_actor_cannot_hard_delete 간헐 실패(2026-11-05 전체 check 1회) · 결정적 재현: 엔진 이벤트로 루프 COMMIT 과 반납 ROLLBACK 사이를 벌린 스크래치 mech2.py · app_repro2.py — 보고서 .claude/state/reports/sample-delete-race.md",
+      "expected": "영구 삭제가 204 를 주면 직후 조회는 404 · 삭제 이벤트와 DB 상태가 일치",
+      "actual": "204 뒤 조회 200 · sample.item.deleted 는 이미 발행 · 되살아난 항목에 활동 행 · 반대 순서로 요청의 반쯤 된 일이 먼저 확정되기도 함",
+      "env": "nova_common/db.py Database 의 sqlite:// StaticPool(프로세스 전역 연결 하나) + service.py 이벤트 루프 스레드(릴레이 · 소비) + 동기 라우트 작업 스레드 · 영향: 단위 테스트 · DEV_MEMORY_DB=1 개발 서버(ui-smoke · 시연) · devstack — 운영 MariaDB · 파일 SQLite 는 해당 없음",
+      "created": "2026-11-05",
+      "updated": "2026-11-05"
+    },
+    {
+      "id": "ISS-261105-02",
+      "kind": "defect",
+      "grade": "P2",
+      "status": "open",
+      "title": "운영 게이트웨이가 메모리 DB(sqlite://)로 뜬다 — DATABASE_URL_GATEWAY 기본값 · k3s 배포 원천에 값 없음 · 운영 안전장치가 게이트웨이 DB 를 검사하지 않음",
+      "repro": "services/gateway/gateway/app.py:14 db_url=os.getenv('DATABASE_URL_GATEWAY', 'sqlite://') · grep 으로 infra/k3s 에 DATABASE_URL_GATEWAY 없음 확인(2026-11-05) · ISS-261105-01 고치기 검토(.claude/state/reports/iss01-review.md 중요 2)에서 발견",
+      "expected": "운영(NOVA_ENV=prod)에서는 게이트웨이도 영속 DB(MariaDB)를 쓰거나, DB 가 필요 없으면 쓰지 않음이 명시되고 · 메모리 DB 면 기동 거부",
+      "actual": "운영 게이트웨이가 프로세스 메모리 DB 로 뜬다 — 재시작 시 게이트웨이 표(아웃박스 등) 내용 소실 · 복제본마다 따로 · ISS-261105-01 경합도 운영에 존재",
+      "env": "k3s 배포(infra/k3s) · nova_common runtime.prod_safety_errors 가 게이트웨이 db_url 을 보지 않음 · 아직 실운영 배포 전(v0.1.0 템플릿)",
+      "created": "2026-11-05",
+      "updated": "2026-11-05"
+    }
+  ]
+}

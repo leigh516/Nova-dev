@@ -1,0 +1,215 @@
+<!-- mockup: {"app": "app", "active": "/design", "title": "디자인 갤러리 — REQ-261104-16 새 절(바뀐 뒤)", "width": 1280} -->
+<style>
+/* 목업 전용 — plan_REQ_05 §2 의 새 의미 토큰 이름 · §1.1 후보 값을 흉내 낸다. 1단계에서 brand.tokens.json 으로 옮기면 이 블록은 버린다(실제 화면에 복사 금지). */
+:root {
+  --color-bg-nav: #1E2366; --color-bg-nav-active: #A3ABF7;
+  --color-text-on-nav: #F7F8FA; --color-text-on-nav-muted: #9AA2B1; --color-text-on-nav-active: #141821; --color-border-focus-on-nav: #A3ABF7;
+  --color-status-success-solid: #0E7A57; --color-status-warning-solid: #F5B83D; --color-status-danger-solid: #B42F2F;
+  --color-status-info-solid: #4F5BD5; --color-status-neutral-solid: #586172;
+  --color-status-on-solid: #FFFFFF; --color-status-on-warning-solid: #141821;
+  --color-ai-fg: #6D28D9; --color-ai-bg: #EDE9FE; --color-ai-border: #6D28D9;
+  --color-chart-1: #2A64D0; --color-chart-2: #0D7D72; --color-chart-3: #A35A09; --color-chart-4: #C2410C; --color-chart-5: #7C4DDB; --color-chart-6: #C2307A;
+  --color-domain-1-mark: #2A64D0; --color-domain-2-mark: #0D7D72; --color-domain-3-mark: #A35A09; --color-domain-4-mark: #C2410C; --color-domain-5-mark: #7C4DDB; --color-domain-6-mark: #C2307A;
+  --color-domain-1-text: #2A64D0; --color-domain-2-text: #0D7D72; --color-domain-3-text: #A35A09; --color-domain-4-text: #C2410C; --color-domain-5-text: #7C4DDB; --color-domain-6-text: #C2307A;
+}
+:root[data-theme="dark"] {
+  --color-status-success-solid: #5CC79B; --color-status-warning-solid: #F9CF73; --color-status-danger-solid: #F08A8A;
+  --color-status-info-solid: #A3ABF7; --color-status-neutral-solid: #9AA2B1;
+  --color-status-on-solid: #141821; --color-status-on-warning-solid: #141821;
+  --color-ai-fg: #C4B5FD; --color-ai-bg: #2A2145; --color-ai-border: #C4B5FD;
+  --color-chart-1: #86AFFF; --color-chart-2: #4FD1C1; --color-chart-3: #F6B35C; --color-chart-4: #FF9A6B; --color-chart-5: #B9A2FF; --color-chart-6: #F59AC6;
+  --color-domain-1-mark: #86AFFF; --color-domain-2-mark: #4FD1C1; --color-domain-3-mark: #F6B35C; --color-domain-4-mark: #FF9A6B; --color-domain-5-mark: #B9A2FF; --color-domain-6-mark: #F59AC6;
+  --color-domain-1-text: #86AFFF; --color-domain-2-text: #4FD1C1; --color-domain-3-text: #F6B35C; --color-domain-4-text: #FF9A6B; --color-domain-5-text: #B9A2FF; --color-domain-6-text: #F59AC6;
+}
+/* 부품 흉내 — 의미 토큰 var(--color-…) 만 쓴다 */
+.badge.solid.success { background: var(--color-status-success-solid); color: var(--color-status-on-solid); }
+.badge.solid.danger { background: var(--color-status-danger-solid); color: var(--color-status-on-solid); }
+.badge.solid.info { background: var(--color-status-info-solid); color: var(--color-status-on-solid); }
+.badge.solid.neutral { background: var(--color-status-neutral-solid); color: var(--color-status-on-solid); }
+.badge.solid.warning { background: var(--color-status-warning-solid); color: var(--color-status-on-warning-solid); }
+.tile { border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); background: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); box-shadow: var(--elevation-card); }
+.tile.solid.danger { background: var(--color-status-danger-solid); border-color: var(--color-status-danger-solid); color: var(--color-status-on-solid); }
+.tile.solid.danger .stat .k, .tile.solid.danger .stat .d { color: var(--color-status-on-solid); }
+.sidebar.deep { background: var(--color-bg-nav); border-right-color: var(--color-bg-nav); }
+.sidebar.deep a { color: var(--color-text-on-nav-muted); }
+.sidebar.deep a.hover { color: var(--color-text-on-nav); }
+.sidebar.deep a[aria-current="page"] { background: var(--color-bg-nav-active); color: var(--color-text-on-nav-active); }
+.sidebar.deep a.focus { outline: 2px solid var(--color-border-focus-on-nav); outline-offset: 2px; }
+.sidebar .group { font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-on-nav-muted); padding: var(--space-3) var(--space-3) var(--space-1); }
+.ai-mark { display: inline-flex; align-items: center; gap: var(--space-1); height: 22px; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-ai-border); background: var(--color-ai-bg); color: var(--color-ai-fg); font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.ai-card { border: 1px solid var(--color-ai-border); border-radius: var(--radius-lg); background: var(--color-bg-surface); padding: var(--space-5); box-shadow: var(--elevation-card); }
+.ai-card .why { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-ai-bg); color: var(--color-ai-fg); font-size: var(--font-size-sm); }
+.ai-card .actions { margin-top: var(--space-5); display: flex; justify-content: flex-end; gap: var(--space-2); }
+.focus-ring { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.domain-tag { display: inline-flex; align-items: center; gap: var(--space-2); height: 22px; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-border-subtle); background: var(--color-bg-surface); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.domain-tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dm); }
+.domain-tag.d1 { --dm: var(--color-domain-1-mark); color: var(--color-domain-1-text); }
+.domain-tag.d2 { --dm: var(--color-domain-2-mark); color: var(--color-domain-2-text); }
+.domain-tag.d3 { --dm: var(--color-domain-3-mark); color: var(--color-domain-3-text); }
+.domain-tag.d4 { --dm: var(--color-domain-4-mark); color: var(--color-domain-4-text); }
+.domain-tag.d5 { --dm: var(--color-domain-5-mark); color: var(--color-domain-5-text); }
+.domain-tag.d6 { --dm: var(--color-domain-6-mark); color: var(--color-domain-6-text); }
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-3); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.legend span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.c1 { background: var(--color-chart-1); } .c2 { background: var(--color-chart-2); } .c3 { background: var(--color-chart-3); }
+.c4 { background: var(--color-chart-4); } .c5 { background: var(--color-chart-5); } .c6 { background: var(--color-chart-6); }
+.bars .b i.c1 { background: var(--color-chart-1); } .bars .b i.c2 { background: var(--color-chart-2); } .bars .b i.c3 { background: var(--color-chart-3); }
+.bars .b i.c4 { background: var(--color-chart-4); } .bars .b i.c5 { background: var(--color-chart-5); } .bars .b i.c6 { background: var(--color-chart-6); }
+.dash-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.dash-grid .wide { grid-column: 1 / -1; }
+.stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+.block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-3); }
+.split { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.table tbody tr[aria-selected="true"] td { background: var(--color-status-info-bg); }
+.settings { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.subnav { display: flex; flex-direction: column; gap: var(--space-1); }
+.subnav a { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
+.subnav a[aria-current="page"] { background: var(--color-status-info-bg); color: var(--color-text-brand); }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border-subtle); }
+.frame { background: var(--color-bg-subtle); border-radius: var(--radius-lg); padding: var(--space-5); }
+.dialog.static { width: 100%; }
+.dialog.sm { max-width: 360px; } .dialog.md { max-width: 520px; } .dialog.lg { max-width: 720px; }
+.dialog .dhead { display: flex; justify-content: space-between; align-items: center; }
+.hsearch { display: flex; align-items: center; gap: var(--space-2); height: 36px; min-width: 280px; padding: 0 var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-inverse2); color: var(--color-text-inverse-muted); font-size: var(--font-size-sm); }
+.hsearch kbd { margin-left: auto; background: transparent; color: var(--color-text-inverse-muted); border-color: var(--color-text-inverse-muted); }
+.notif { position: relative; }
+.notif .count { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: var(--radius-pill); display: grid; place-items: center; font-size: 11px; font-weight: var(--font-weight-bold); background: var(--color-status-danger-solid); color: var(--color-status-on-solid); }
+.tenant { display: flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-bg-inverse2); color: var(--color-text-inverse); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); background: transparent; }
+.tenant small { color: var(--color-text-inverse-muted); font-weight: var(--font-weight-regular); }
+.menu { position: absolute; right: 0; top: 44px; width: 260px; background: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); box-shadow: var(--elevation-overlay); padding: var(--space-2); z-index: 5; }
+.menu button { all: unset; display: flex; justify-content: space-between; width: calc(100% - 2 * var(--space-3)); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: var(--font-size-sm); cursor: pointer; }
+.menu button[aria-checked="true"] { background: var(--color-status-info-bg); color: var(--color-text-brand); font-weight: var(--font-weight-semibold); }
+.progress { height: 6px; border-radius: var(--radius-pill); background: var(--color-bg-subtle); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--color-action-primary); }
+.svgline { fill: none; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.check { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+</style>
+<div class="content wide">
+  <div class="page-header">
+    <div><h1>디자인 갤러리</h1><p class="desc">토큰 → 컴포넌트 → 템플릿. 색 · 간격은 design/tokens/brand.tokens.json 에서만 바꾼다.</p></div>
+    <div class="row"><a class="btn secondary sm mock-new">대시보드 시연</a><a class="btn secondary sm mock-new">스플릿 시연</a><a class="btn secondary sm mock-new">설정 시연</a></div>
+  </div>
+  <p class="small muted">기존 절(색 토큰 · 버튼 · 배지 · 지표 · 입력 · 피드백 · 상태 · 표 · 막대)은 그대로 위에 있고, 아래 점선 절이 새로 붙는다.</p>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>솔리드 상태 배지 · 타일</h3><span class="xs muted">경보 강조에만 — 화면당 한 곳 권장</span></div>
+    <div class="row">
+      <span class="badge solid danger">위험</span><span class="badge solid warning">경고</span><span class="badge solid success">정상</span><span class="badge solid info">정보</span><span class="badge solid neutral">중지</span>
+      <span class="muted small" style="margin:0 var(--space-2)">기본(옅은) 배지와 비교 →</span>
+      <span class="badge danger">위험</span><span class="badge warning">경고</span><span class="badge success">정상</span>
+    </div>
+    <div class="stat-row" style="margin-top:var(--space-4)">
+      <div class="tile solid danger"><div class="stat"><span class="k">위험 경보</span><span class="v">3</span><span class="d">지난 1시간 +2</span></div></div>
+      <div class="tile"><div class="stat"><span class="k">경고</span><span class="v">12</span><span class="d">지난 1시간 −1</span></div></div>
+      <div class="tile"><div class="stat"><span class="k">정상 장비</span><span class="v">248</span><span class="d">전체 263</span></div></div>
+      <div class="tile"><div class="stat"><span class="k">중지</span><span class="v">0</span><span class="d">변화 없음</span></div></div>
+    </div>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>AI 표식 · AI 실행 확인 카드 (STD-AX L2)</h3><span class="xs muted">AI 가 만든 초안에는 표식, AI 가 실행을 제안하면 카드 — 승인 API 는 서버 require_human</span></div>
+    <div class="grid" style="--min:420px;align-items:start">
+      <div class="card stack">
+        <div class="row"><span class="ai-mark" aria-label="AI 생성">✦ AI</span><span class="small">경보 요약 초안 — 사람이 확인 전</span></div>
+        <p class="small secondary">지난 1시간 동안 방화벽 3대에서 같은 출발지의 접속 시도가 몰렸습니다. 같은 패턴은 지난주 화요일에도 있었습니다.</p>
+        <div class="row"><span class="badge">초안</span><span class="xs muted">L1 — 표식만, 실행 없음</span></div>
+      </div>
+      <div class="ai-card" role="region" aria-label="AI 실행 확인">
+        <div class="row between"><div class="row"><span class="ai-mark" aria-label="AI 생성">✦ AI 제안</span><strong>장비 3대 격리</strong></div><span class="badge info">L2 · 승인 후 실행</span></div>
+        <p class="why">왜 확인이 필요한가 — 격리하면 해당 장비의 업무 트래픽이 끊깁니다. 대상과 범위를 읽고 승인하세요.</p>
+        <dl class="kv" style="margin-top:var(--space-3)">
+          <dt>대상</dt><dd>FW-SEOUL-02 · FW-SEOUL-05 · FW-BUSAN-01</dd>
+          <dt>범위</dt><dd>누리 관제센터 · 운영망</dd>
+          <dt>격리 방식</dt><dd>외부 접속 차단(내부 관리 접속 유지)</dd>
+          <dt>지속 시간</dt><dd>4시간 뒤 자동 해제</dd>
+          <dt>되돌림</dt><dd><span class="badge danger">되돌릴 수 없습니다</span> <span class="xs muted">격리 중 끊긴 세션은 복구되지 않음</span></dd>
+        </dl>
+        <div class="actions"><button class="btn secondary focus-ring">취소</button><button class="btn danger">승인 — 격리 실행</button></div>
+        <p class="xs muted" style="text-align:right;margin-top:var(--space-2)">기본 포커스는 취소 · 화면을 열기만 해서는 실행되지 않습니다</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>도메인 식별 태그</h3><span class="xs muted">모듈 → 번호 슬롯 매핑은 데이터(map) — 상태색과 섞지 않는다</span></div>
+    <div class="row"><span class="domain-tag d1">관제</span><span class="domain-tag d2">자산</span><span class="domain-tag d3">계약</span><span class="domain-tag d4">장애</span><span class="domain-tag d5">AI 서버</span><span class="domain-tag d6">보고</span></div>
+    <p class="xs muted" style="margin-top:var(--space-2)">슬롯 1~6 · 태그는 점(mark)과 글자(text) 두 토큰만 쓴다. 상태는 옆에 배지로 따로: <span class="domain-tag d1">관제</span> <span class="badge danger">위험</span></p>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>차트 색 (chart.1 ~ 6)</h3><span class="xs muted">chartColor(i) — 계열 순서대로, 다크는 밝은 단계</span></div>
+    <div class="grid" style="--min:360px">
+      <div class="card stack">
+        <div class="legend"><span><i class="c1"></i>계열 1</span><span><i class="c2"></i>계열 2</span><span><i class="c3"></i>계열 3</span><span><i class="c4"></i>계열 4</span><span><i class="c5"></i>계열 5</span><span><i class="c6"></i>계열 6</span></div>
+        <div class="bars" style="height:120px">
+          <div class="b"><i class="c1" style="height:70%"></i><span class="xs muted">1</span></div>
+          <div class="b"><i class="c2" style="height:45%"></i><span class="xs muted">2</span></div>
+          <div class="b"><i class="c3" style="height:90%"></i><span class="xs muted">3</span></div>
+          <div class="b"><i class="c4" style="height:30%"></i><span class="xs muted">4</span></div>
+          <div class="b"><i class="c5" style="height:60%"></i><span class="xs muted">5</span></div>
+          <div class="b"><i class="c6" style="height:50%"></i><span class="xs muted">6</span></div>
+        </div>
+      </div>
+      <div class="card stack">
+        <span class="small secondary">Sparkline 계열 색</span>
+        <svg preserveAspectRatio="none" viewBox="0 0 300 100" width="100%" height="120" role="img" aria-label="계열 3개 추이">
+          <polyline class="svgline" style="stroke:var(--color-chart-1)" points="0,70 50,60 100,65 150,40 200,45 250,30 300,35"/>
+          <polyline class="svgline" style="stroke:var(--color-chart-2)" points="0,85 50,80 100,72 150,75 200,60 250,62 300,55"/>
+          <polyline class="svgline" style="stroke:var(--color-chart-3)" points="0,40 50,50 100,35 150,55 200,50 250,70 300,65"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>폼 모달 (FormDialog — 크기 sm · md · lg 중 md 시연)</h3><span class="xs muted">짧은 입력은 모달로 — Esc · 바깥 클릭이면 닫고, 입력이 있으면 닫기 확인</span></div>
+    <div class="frame">
+      <div class="dialog static md" role="dialog" aria-label="담당자 추가">
+        <div class="dhead"><h2>담당자 추가</h2><span class="badge">md</span></div>
+        <div class="stack" style="margin-top:var(--space-4)">
+          <div class="field"><label>이름<span class="req">*</span></label><input class="input" value="김관제"></div>
+          <div class="field"><label>연락 수단</label><select class="select"><option>메일</option></select><span class="help">경보가 오면 이 수단으로 알립니다</span></div>
+        </div>
+        <div class="actions"><button class="btn ghost">취소</button><button class="btn primary">추가</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>헤더 유틸 — 검색 · 알림 · 테넌트 전환</h3><span class="xs muted">AppShell header 설정 — 테넌트 전환은 앱이 준 onSwitch(서버 재발급)로만</span></div>
+    <div class="topbar" style="border-radius:var(--radius-lg)">
+      <div class="topbar-in" style="max-width:none">
+        <a class="brand"><span class="mark">N</span>Nova</a>
+        <div class="hsearch">검색 <kbd>Ctrl</kbd><kbd style="margin-left:0">K</kbd></div>
+        <div class="grow"></div>
+        <button class="iconbtn notif" aria-label="알림 5건">🔔<span class="count">5</span></button>
+        <button class="tenant">누리 관제센터 <small>(전환)</small></button>
+        <button class="userchip"><span class="avatar">사</span><span>사용자 · 로그아웃</span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>딥 사이드바 미리보기 (navTone: "deep")</h3><span class="xs muted">같은 Sidebar 부품에 tone 만 — 활성 · 포커스는 nav 전용 토큰</span></div>
+    <div class="grid" style="--min:240px">
+      <aside class="sidebar deep" style="border-radius:var(--radius-lg)">
+        <span class="group">관제</span>
+        <a href="#" aria-current="page">대시보드</a><a href="#" class="hover">경보</a><a href="#" class="focus">장비</a><a href="#">보고서</a>
+      </aside>
+      <aside class="sidebar" style="border-radius:var(--radius-lg);border:1px solid var(--color-border-subtle)">
+        <span class="group" style="color:var(--color-text-muted)">기본 톤(지금)</span>
+        <a href="#" aria-current="page">대시보드</a><a href="#">경보</a><a href="#">장비</a><a href="#">보고서</a>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section mock-new">
+    <div class="section-head"><h3>목록 내보내기 (ListPage export)</h3><span class="xs muted">같은 검색 조건 그대로 · 개인정보 열은 가려서 · 상한 5,000행</span></div>
+    <div class="card stack">
+      <div class="row between"><span class="small">검색 결과 <strong class="num">3,480</strong>건</span><div class="row"><button class="btn secondary sm" aria-disabled="true"><span class="spinner"></span>내보내는 중</button><a class="btn primary sm">새 항목</a></div></div>
+      <div class="progress" aria-label="내보내기 진행"><i style="width:34%"></i></div>
+      <span class="xs muted"><span class="num">1,200 / 3,480</span>행 내보내는 중 · 연락처 열은 ****로 가립니다 · 끝나면 알려 드립니다</span>
+    </div>
+  </section>
+</div>

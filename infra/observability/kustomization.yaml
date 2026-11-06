@@ -1,0 +1,17 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 관측 스택(k3s): Prometheus(+RBAC) · Alertmanager · Grafana(프로비저닝) — 설정 파일은 이 디렉터리의 원본을 ConfigMap 으로
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: observability
+resources: [k8s/prometheus.yaml, k8s/grafana.yaml, k8s/alertmanager.yaml]
+configMapGenerator:
+- name: prometheus-config
+  files: [prometheus/alert_rules.yml, prometheus/business_rules.yml, prometheus/prometheus.yml, prometheus/recording_rules.yml]
+- name: grafana-datasources
+  files: [grafana/provisioning/datasources/prometheus.yml]
+- name: grafana-dashboard-provider
+  files: [grafana/provisioning/dashboards/platform.yml]
+- name: grafana-dashboards
+  files: [grafana/dashboards/platform-events.json, grafana/dashboards/platform-overview.json]
+- name: alertmanager-config
+  files: [alertmanager/alertmanager.yml]

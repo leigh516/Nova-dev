@@ -1,0 +1,29 @@
+# 기록 규칙 — 플랫폼 공통 메트릭(nova_common.metrics, 접두어 nova_). 프로젝트 업무 규칙은 아래 business 그룹에 추가한다.
+groups:
+- name: platform-red
+  interval: 30s
+  rules:
+  - record: service:http_requests:rate1m
+    expr: sum by (service) (rate(nova_http_requests_total[1m]))
+  - record: service:http_errors:ratio5m
+    expr: sum by (service) (rate(nova_http_requests_total{status=~"5.."}[5m])) / clamp_min(sum by (service) (rate(nova_http_requests_total[5m])), 1e-9)
+  - record: service:http_latency_seconds:p95_5m
+    expr: histogram_quantile(0.95, sum by (service, le) (rate(nova_http_request_duration_seconds_bucket[5m])))
+  - record: service:http_latency_seconds:p99_5m
+    expr: histogram_quantile(0.99, sum by (service, le) (rate(nova_http_request_duration_seconds_bucket[5m])))
+- name: platform-events
+  interval: 30s
+  rules:
+  - record: topic:events_published:rate5m
+    expr: sum by (topic) (rate(nova_events_published_total[5m]))
+  - record: service_topic:events_consumed:rate5m
+    expr: sum by (service, topic, result) (rate(nova_events_consumed_total[5m]))
+  - record: service:event_delivery_lag_seconds:p95_5m
+    expr: histogram_quantile(0.95, sum by (service, le) (rate(nova_event_delivery_lag_seconds_bucket[5m])))
+  - record: service:kafka_consumer_lag:sum
+    expr: sum by (service) (nova_kafka_consumer_lag)
+- name: platform-saga
+  interval: 1m
+  rules:
+  - record: saga:duration_seconds:p95_15m
+    expr: histogram_quantile(0.95, sum by (saga, outcome, le) (rate(nova_saga_duration_seconds_bucket[15m])))

@@ -1,0 +1,10 @@
+# 줄 끝은 LF 로 통일 — CRLF 는 bash 스크립트·생성물 비교(--check)를 깨뜨린다
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary
+*.jar binary

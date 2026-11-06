@@ -1,0 +1,665 @@
+{
+ "screens": [
+  {
+   "id": "SCR-WAPP-0009",
+   "app": "app",
+   "name": "디자인 갤러리 — 대시보드",
+   "route": "/design/dashboard",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/design/dashboard/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0001",
+   "app": "app",
+   "name": "디자인 갤러리",
+   "route": "/design",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/design/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0010",
+   "app": "app",
+   "name": "디자인 갤러리 — 설정",
+   "route": "/design/settings",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/design/settings/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0011",
+   "app": "app",
+   "name": "디자인 갤러리 — 스플릿",
+   "route": "/design/split",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/design/split/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0002",
+   "app": "app",
+   "name": "도움말",
+   "route": "/help",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/help/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0003",
+   "app": "app",
+   "name": "항목 상세",
+   "route": "/items/[id]",
+   "status": "완료",
+   "apis": [
+    "POST /sample/items/{item_id}/archive",
+    "POST /sample/items/{item_id}/restore",
+    "GET /sample/items/{item_id}"
+   ],
+   "tables": [
+    "item",
+    "item_activity"
+   ],
+   "loc": "web/apps/app/app/items/[id]/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0004",
+   "app": "app",
+   "name": "항목 만들기",
+   "route": "/items/new",
+   "status": "완료",
+   "apis": [
+    "POST /sample/items"
+   ],
+   "tables": [
+    "item",
+    "item_activity"
+   ],
+   "loc": "web/apps/app/app/items/new/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0005",
+   "app": "app",
+   "name": "항목 목록",
+   "route": "/items",
+   "status": "완료",
+   "apis": [
+    "POST /sample/items/{item_id}/archive",
+    "POST /sample/items/{item_id}/restore",
+    "DELETE /sample/items/{item_id}",
+    "GET /sample/items"
+   ],
+   "tables": [
+    "item",
+    "item_activity"
+   ],
+   "loc": "web/apps/app/app/items/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0006",
+   "app": "app",
+   "name": "로그인",
+   "route": "/login",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/login/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0007",
+   "app": "app",
+   "name": "운영 모니터링",
+   "route": "/ops",
+   "status": "완료",
+   "apis": [
+    "GET /ops/monitoring/overview"
+   ],
+   "tables": [],
+   "loc": "web/apps/app/app/ops/page.tsx"
+  },
+  {
+   "id": "SCR-WAPP-0008",
+   "app": "app",
+   "name": "홈",
+   "route": "/",
+   "status": "완료",
+   "apis": [],
+   "tables": [],
+   "loc": "web/apps/app/app/page.tsx"
+  }
+ ],
+ "db": [
+  {
+   "table": "item",
+   "column": "id",
+   "type": "VARCHAR(36)",
+   "meaning": "항목 식별자(UUIDv7)",
+   "flags": [
+    "PK"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "tenant_id",
+   "type": "VARCHAR(40)",
+   "meaning": "테넌트(STD-TENANCY-001)",
+   "flags": [
+    "INDEX",
+    "NULL"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "name",
+   "type": "VARCHAR(100)",
+   "meaning": "항목 이름",
+   "flags": [],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "memo",
+   "type": "TEXT",
+   "meaning": "메모",
+   "flags": [
+    "NULL"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "status",
+   "type": "VARCHAR(20)",
+   "meaning": "상태 active|archived",
+   "flags": [
+    "INDEX"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "created_at",
+   "type": "DATETIME",
+   "meaning": "만든 시각(UTC)",
+   "flags": [],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "created_by",
+   "type": "VARCHAR(36)",
+   "meaning": "만든 사용자",
+   "flags": [
+    "NULL"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "updated_at",
+   "type": "DATETIME",
+   "meaning": "고친 시각(UTC)",
+   "flags": [],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item",
+   "column": "updated_by",
+   "type": "VARCHAR(36)",
+   "meaning": "고친 사용자",
+   "flags": [
+    "NULL"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item_activity",
+   "column": "id",
+   "type": "VARCHAR(36)",
+   "meaning": "활동 식별자(UUIDv7)",
+   "flags": [
+    "PK"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item_activity",
+   "column": "tenant_id",
+   "type": "VARCHAR(40)",
+   "meaning": "테넌트(STD-TENANCY-001)",
+   "flags": [
+    "INDEX",
+    "NULL"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item_activity",
+   "column": "item_id",
+   "type": "VARCHAR(36)",
+   "meaning": "대상 항목(item.id)",
+   "flags": [
+    "INDEX"
+   ],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item_activity",
+   "column": "kind",
+   "type": "VARCHAR(40)",
+   "meaning": "활동 종류 created|archived|restored",
+   "flags": [],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item_activity",
+   "column": "event_id",
+   "type": "VARCHAR(36)",
+   "meaning": "원인 이벤트 ID(멱등 추적)",
+   "flags": [],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "item_activity",
+   "column": "recorded_at",
+   "type": "DATETIME",
+   "meaning": "기록 시각(UTC)",
+   "flags": [],
+   "service": "sample",
+   "common": false
+  },
+  {
+   "table": "outbox",
+   "column": "id",
+   "type": "INTEGER",
+   "meaning": "일련번호",
+   "flags": [
+    "PK"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "event_id",
+   "type": "VARCHAR(40)",
+   "meaning": "이벤트 ID(UUIDv7)",
+   "flags": [
+    "UNIQUE"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "topic",
+   "type": "VARCHAR(120)",
+   "meaning": "토픽",
+   "flags": [
+    "INDEX"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "key",
+   "type": "VARCHAR(80)",
+   "meaning": "파티션 키(집계 ID)",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "payload",
+   "type": "JSON",
+   "meaning": "봉투 전체(JSON)",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "created_at",
+   "type": "DATETIME",
+   "meaning": "적재 시각(UTC)",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "sent_at",
+   "type": "DATETIME",
+   "meaning": "발행 시각 — 비면 미발행",
+   "flags": [
+    "INDEX",
+    "NULL"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "attempts",
+   "type": "INTEGER",
+   "meaning": "발행 시도 횟수",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "last_error",
+   "type": "TEXT",
+   "meaning": "마지막 발행 오류",
+   "flags": [
+    "NULL"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "outbox",
+   "column": "is_parked",
+   "type": "BOOLEAN",
+   "meaning": "독 메시지 격리(재처리 대기)",
+   "flags": [
+    "INDEX"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "processed_event",
+   "column": "event_id",
+   "type": "VARCHAR(40)",
+   "meaning": "처리한 이벤트 ID",
+   "flags": [
+    "PK"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "processed_event",
+   "column": "consumer",
+   "type": "VARCHAR(80)",
+   "meaning": "소비 서비스",
+   "flags": [
+    "PK"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "processed_event",
+   "column": "topic",
+   "type": "VARCHAR(120)",
+   "meaning": "토픽",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "processed_event",
+   "column": "idempotency_key",
+   "type": "VARCHAR(320)",
+   "meaning": "중복 제거 키(봉투 idempotency_key)",
+   "flags": [
+    "NULL"
+   ],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "processed_event",
+   "column": "is_ok",
+   "type": "BOOLEAN",
+   "meaning": "처리 성공",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  },
+  {
+   "table": "processed_event",
+   "column": "processed_at",
+   "type": "DATETIME",
+   "meaning": "처리 시각(UTC)",
+   "flags": [],
+   "service": "sample",
+   "common": true
+  }
+ ],
+ "permissions": [
+  {
+   "key": "ops.read",
+   "module": "ops",
+   "action": "read",
+   "apis": [
+    "게이트웨이 운영 API"
+   ],
+   "service": "gateway",
+   "label": "ops 조회",
+   "roles": [
+    "manager",
+    "admin"
+   ]
+  },
+  {
+   "key": "sample.create",
+   "module": "sample",
+   "action": "create",
+   "apis": [
+    "POST /sample/items"
+   ],
+   "service": "sample",
+   "label": "sample 등록",
+   "roles": [
+    "user",
+    "manager",
+    "admin"
+   ]
+  },
+  {
+   "key": "sample.delete",
+   "module": "sample",
+   "action": "delete",
+   "apis": [
+    "DELETE /sample/items/{item_id}"
+   ],
+   "service": "sample",
+   "label": "sample 삭제",
+   "roles": [
+    "manager",
+    "admin"
+   ]
+  },
+  {
+   "key": "sample.read",
+   "module": "sample",
+   "action": "read",
+   "apis": [
+    "GET /sample/items",
+    "GET /sample/items/{item_id}"
+   ],
+   "service": "sample",
+   "label": "sample 조회",
+   "roles": [
+    "guest",
+    "user",
+    "manager",
+    "admin"
+   ]
+  },
+  {
+   "key": "sample.update",
+   "module": "sample",
+   "action": "update",
+   "apis": [
+    "PATCH /sample/items/{item_id}",
+    "POST /sample/items/{item_id}/archive",
+    "POST /sample/items/{item_id}/restore"
+   ],
+   "service": "sample",
+   "label": "sample 수정",
+   "roles": [
+    "user",
+    "manager",
+    "admin"
+   ]
+  }
+ ],
+ "roles": [
+  {
+   "code": "guest",
+   "name": "비로그인",
+   "grants": [
+    "sample.read"
+   ]
+  },
+  {
+   "code": "user",
+   "name": "일반 사용자",
+   "grants": [
+    "sample.read",
+    "sample.create",
+    "sample.update"
+   ]
+  },
+  {
+   "code": "manager",
+   "name": "관리책임자",
+   "grants": [
+    "sample.*",
+    "ops.read"
+   ]
+  },
+  {
+   "code": "admin",
+   "name": "관리자",
+   "grants": [
+    "*"
+   ]
+  }
+ ],
+ "events": [
+  {
+   "topic": "sample.item.created",
+   "partitions": 3,
+   "retention_days": 7,
+   "publishers": [
+    "sample"
+   ],
+   "subscribers": [
+    "sample"
+   ],
+   "payload": [
+    "id",
+    "name"
+   ],
+   "schema": null
+  },
+  {
+   "topic": "sample.item.updated",
+   "partitions": 3,
+   "retention_days": 7,
+   "publishers": [
+    "sample"
+   ],
+   "subscribers": [],
+   "payload": [
+    "id",
+    "name"
+   ],
+   "schema": null
+  },
+  {
+   "topic": "sample.item.archived",
+   "partitions": 3,
+   "retention_days": 7,
+   "publishers": [
+    "sample"
+   ],
+   "subscribers": [
+    "sample"
+   ],
+   "payload": [
+    "id"
+   ],
+   "schema": null
+  },
+  {
+   "topic": "sample.item.restored",
+   "partitions": 3,
+   "retention_days": 7,
+   "publishers": [
+    "sample"
+   ],
+   "subscribers": [
+    "sample"
+   ],
+   "payload": [
+    "id"
+   ],
+   "schema": null
+  },
+  {
+   "topic": "sample.item.deleted",
+   "partitions": 3,
+   "retention_days": 7,
+   "publishers": [
+    "sample"
+   ],
+   "subscribers": [],
+   "payload": [
+    "id"
+   ],
+   "schema": null
+  },
+  {
+   "topic": "platform.feature.changed",
+   "partitions": 1,
+   "retention_days": 7,
+   "publishers": [],
+   "subscribers": [
+    "gateway"
+   ],
+   "payload": [],
+   "schema": null
+  },
+  {
+   "topic": "platform.rbac.changed",
+   "partitions": 1,
+   "retention_days": 7,
+   "publishers": [],
+   "subscribers": [
+    "gateway"
+   ],
+   "payload": [],
+   "schema": null
+  }
+ ]
+}

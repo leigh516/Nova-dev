@@ -1,0 +1,35 @@
+<!-- mockup: {"app": "app", "active": "/items", "title": "항목 상세 — 활동 상한 안내 · '보관 풂' 기록(바뀐 뒤)", "width": 1280} -->
+<!-- T04-1.05 · plan_REQ_04 §4 — DetailPage 템플릿 그대로. 새로 생기는 것(mock-new): 활동 기록의 '보관 풂' 줄(T04-3.06) · "최근 50건만 보입니다" 안내(T04-6.04) -->
+<div class="content default">
+  <div class="page-header">
+    <div>
+      <nav class="crumbs" aria-label="현재 위치"><span><a href="#">항목</a></span></nav>
+      <h1>분기 보고서</h1>
+    </div>
+    <div class="row"><button class="btn secondary">보관</button></div>
+  </div>
+  <div class="card">
+    <dl class="kv">
+      <dt>상태</dt><dd><span class="badge success">사용 중</span></dd>
+      <dt>메모</dt><dd>3분기 실적 정리 — 다음 주 회의 자료</dd>
+      <dt>만든 때</dt><dd>2026-10-02 09:14</dd>
+      <dt>고친 때</dt><dd>2026-11-05 10:42</dd>
+      <dt>ID</dt><dd><code>01933f8a-7c21-7b4e-9a10-5d2c8e4f1a07</code></dd>
+    </dl>
+  </div>
+  <section class="section">
+    <div class="section-head"><h3>활동 기록</h3></div>
+    <div class="card">
+      <p class="muted small list-note mock-new" role="status">최근 50건만 보입니다. 그 전 기록은 서버에 남아 있습니다.</p>
+      <ul class="stack list">
+        <!-- 순서는 서버 · 웹과 같이 오래된 것이 위(최신 50건을 고르되 보이는 순서는 오래된 것부터 — plan_REQ_04 §12.1, T04-5.10) -->
+        <li>만듦 <span class="muted small">· 2026-10-02 09:14</span></li>
+        <li>보관함 <span class="muted small">· 2026-10-27 18:31</span></li>
+        <li>보관 풂 <span class="muted small">· 2026-10-28 11:05</span></li>
+        <li>고침 <span class="muted small">· 2026-11-03 14:20</span></li>
+        <li>보관함 <span class="muted small">· 2026-11-04 17:03</span></li>
+        <li class="mock-new">보관 풂 <span class="muted small">· 2026-11-05 10:42</span></li>
+      </ul>
+    </div>
+  </section>
+</div>

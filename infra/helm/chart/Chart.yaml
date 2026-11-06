@@ -1,0 +1,7 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+apiVersion: v2
+name: nova
+description: Nova 서비스 umbrella 차트(ArgoCD 대비). 인프라(Kafka · MariaDB · 관측)는 Kustomize base 를 사용
+type: application
+version: 0.2.0
+appVersion: "0.2.0"

@@ -1,0 +1,87 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: edge
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: core
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-sample
+  namespace: core
+spec:
+  podSelector: {matchLabels: {app: sample}}
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector: {matchLabels: {nova.dev/ns: edge}}
+      podSelector: {matchLabels: {app: gateway}}
+    - namespaceSelector: {matchLabels: {nova.dev/ns: observability}}  # Prometheus 스크레이프만
+      podSelector: {matchExpressions: [{key: app, operator: In, values: [prometheus]}]}
+    ports: [{port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway
+  namespace: edge
+spec:
+  podSelector: {matchLabels: {app: gateway}}
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}  # 인그레스 컨트롤러(Traefik)
+    - namespaceSelector: {matchLabels: {nova.dev/ns: observability}}  # Prometheus 스크레이프 · Alertmanager 웹훅
+      podSelector: {matchExpressions: [{key: app, operator: In, values: [prometheus, alertmanager]}]}
+    ports: [{port: 8000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-controller
+  namespace: edge
+spec:
+  podSelector: {matchExpressions: [{key: app, operator: In, values: [web-app]}]}
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}  # 인그레스 컨트롤러(Traefik)
+    ports: [{port: 3000}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: kafka-from-services, namespace: infra}
+spec:
+  podSelector: {matchLabels: {app: kafka}}
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector: {matchExpressions: [{key: nova.dev/ns, operator: In, values: [edge, core, infra]}]}
+    ports: [{port: 9092}, {port: 9093}]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: mariadb-from-services, namespace: infra}
+spec:
+  podSelector: {matchLabels: {app: mariadb}}
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector: {matchExpressions: [{key: nova.dev/ns, operator: In, values: [core]}]}
+    # 같은 peer 안의 두 선택자는 AND — infra 네임스페이스의 계정 Job(운영) · 백업 파드만. infra 의 다른 파드(kafka 등)는 막힌다
+    - namespaceSelector: {matchLabels: {nova.dev/ns: infra}}
+      podSelector: {matchExpressions: [{key: app, operator: In, values: [db-provision, mariadb-backup]}]}
+    ports: [{port: 3306}]

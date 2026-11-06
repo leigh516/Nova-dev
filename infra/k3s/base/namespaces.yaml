@@ -1,0 +1,25 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: edge
+  labels: {nova.dev/ns: edge}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core
+  labels: {nova.dev/ns: core}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infra
+  labels: {nova.dev/ns: infra}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels: {nova.dev/ns: observability}
+---

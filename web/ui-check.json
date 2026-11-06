@@ -1,0 +1,13 @@
+{
+  "$comment": "토큰 밖 값 검사(scripts/ui_check.py — python nova.py lint 의 한 단계) 선언. 예외는 토큰을 쓸 수 없는 자리만, 이유와 함께 둔다(늘리지 말고 토큰으로 옮긴다). token 을 적으면 값이 토큰 원천과 같은지도 검사한다.",
+  "roots": ["web/packages", "web/apps"],
+  "exceptions": [
+    {
+      "path": "web/apps/app/app/layout.tsx",
+      "match": "#141821",
+      "reason": "Next viewport.themeColor(브라우저 주소 표시줄 색)는 meta 태그 값이라 CSS 변수 var(--…) 를 받지 못한다 — 상단바와 같은 색(bg.inverse)을 값으로 둔다",
+      "token": "color.bg.inverse",
+      "mode": "dark"
+    }
+  ]
+}

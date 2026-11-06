@@ -1,0 +1,47 @@
+<!-- mockup: {"app": "app", "title": "운영 모니터링 — 상태 배지 매핑 · 템플릿 로딩(바뀐 뒤)", "width": 1280} -->
+<!-- T04-1.07 · plan_REQ_04 §4 · §4.1 H1 · H6 — 화면은 DashboardPage 템플릿 호출 + 데이터 정의만(T04-5.06).
+     새로 생기는 것(mock-new): 상태 → 배지를 StatusBadge 매핑(lib/app.ts OPS_HEALTH · SERVICE_UP · ALERT_SEVERITY, T04-5.07)으로 — 색과 함께 글자 라벨,
+     마지막 갱신 · 지금 새로 고침(템플릿 기본), 첫 로딩은 템플릿 스켈레톤. 운영 메뉴는 서버 메뉴(ops.read)에서 오므로 목업 셸 메뉴에는 없다 -->
+<div class="content wide">
+  <div class="page-header">
+    <div><h1>운영 모니터링</h1><p class="desc">서비스 상태 · 지연 · 아웃박스. 5초마다 자동으로 새로 고칩니다.</p></div>
+    <div class="row"><div class="row small muted mock-new"><span>마지막 갱신 <span class="num">10:42:15</span> · 5초마다</span><button class="btn secondary sm">지금 새로 고침</button></div></div>
+  </div>
+  <div class="stack gap-4">
+    <section class="dash-stats" aria-label="주요 지표">
+      <div class="card stat-card"><div class="stat"><span class="k">가동 서비스</span><span class="v">4 / 5</span></div></div>
+      <div class="card stat-card"><div class="stat"><span class="k">전체 RPS</span><span class="v">12.40</span></div></div>
+      <div class="card stat-card mock-new"><div class="stat"><span class="k">상태</span><span class="v"><span class="badge warning">주의</span></span><span class="d">수집: Prometheus</span></div></div>
+    </section>
+    <section class="dash-grid" aria-label="블록">
+      <section class="card dash-block wide">
+        <div class="section-head"><h3>알림</h3></div>
+        <ul class="stack list">
+          <li><span class="badge danger mock-new">위험</span> <strong>ServiceDown</strong> sample — 1분 넘게 응답하지 않습니다</li>
+          <li><span class="badge warning mock-new">주의</span> <strong>OutboxBacklog</strong> gateway — 미발행 이벤트가 100건을 넘었습니다</li>
+        </ul>
+      </section>
+      <section class="card dash-block wide">
+        <div class="section-head"><h3>서비스 상태</h3></div>
+        <div class="table-wrap"><table class="table">
+          <caption class="sr-only">서비스 상태</caption>
+          <thead><tr><th>서비스</th><th>상태</th><th class="right">RPS</th><th class="right">5xx</th><th class="right">p95</th><th class="right">미발행</th></tr></thead>
+          <tbody>
+            <tr><td>gateway</td><td><span class="badge success mock-new">가동</span></td><td class="right num">8.20</td><td class="right num">0.0%</td><td class="right num">42ms</td><td class="right num">0</td></tr>
+            <tr><td>auth</td><td><span class="badge success">가동</span></td><td class="right num">2.10</td><td class="right num">0.0%</td><td class="right num">31ms</td><td class="right num">0</td></tr>
+            <tr><td>sample</td><td><span class="badge danger mock-new">중단</span></td><td class="right num">0.00</td><td class="right num">—</td><td class="right num">—</td><td class="right num">137</td></tr>
+            <tr><td>rbac</td><td><span class="badge success">가동</span></td><td class="right num">1.60</td><td class="right num">0.2%</td><td class="right num">18ms</td><td class="right num">0</td></tr>
+            <tr><td>ops</td><td><span class="badge success">가동</span></td><td class="right num">0.50</td><td class="right num">0.0%</td><td class="right num">25ms</td><td class="right num">0</td></tr>
+          </tbody>
+        </table></div>
+      </section>
+    </section>
+  </div>
+  <section class="section mock-new">
+    <div class="section-head"><h3>첫 로딩 — 템플릿 스켈레톤(값이 오기 전, 화면은 아무것도 그리지 않는다)</h3></div>
+    <div class="stack" aria-busy="true" aria-label="불러오는 중">
+      <div class="dash-stats"><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div><div class="skeleton" style="height:96px"></div></div>
+      <div class="skeleton" style="height:160px"></div>
+    </div>
+  </section>
+</div>

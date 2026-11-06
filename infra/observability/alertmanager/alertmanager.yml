@@ -1,0 +1,16 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 알림 라우팅(k3s) — critical 은 즉시, warning 은 묶어서.
+# 수신처는 게이트웨이 웹훅 하나뿐이다 — 운영은 overlays/prod/alertmanager.yml 이 oncall 을 더해 대신한다
+route:
+  receiver: gateway
+  group_by: [alertname, service]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+  - {matchers: ['severity="critical"'], receiver: gateway, group_wait: 10s, repeat_interval: 30m}
+receivers:
+- name: gateway
+  webhook_configs:
+  - url: http://gateway.edge.svc.cluster.local:8000/internal/alertmanager  # 클러스터 내부 전용(인그레스 미노출)
+    send_resolved: true

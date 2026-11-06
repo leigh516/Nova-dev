@@ -1,0 +1,39 @@
+# 전체 검사(test · lint) 원격 실행 — 푸시 · PR 마다 GitHub Actions(Linux)가 `python nova.py check` 를 대신 돌린다.
+# 왜: 로컬 전체 검사는 15~40분이 걸려 개발이 멈춘다(REQ-261105-10-2). 로컬은 quick 만, 전체는 여기서.
+# 언제: 모든 브랜치 푸시 · pull_request · 손으로 실행(workflow_dispatch). 같은 브랜치의 이전 실행은 취소한다.
+# 복제본(Nova 로 만든 프로젝트)도 그대로 물려받아 자기 저장소에서 돈다 — 원천 저장소 판정은 하지 않는다.
+# 필요한 도구: uv · Python 3.12 만. Node · JDK · Playwright 브라우저는 check(test · lint)가 쓰지 않아 넣지 않는다.
+# helm · kubectl 은 ubuntu-latest 에 들어 있고, 없으면 validate_infra 가 건너뜀으로 안내한다.
+# 실패하면 로그 끝의 '✗ check 실패: <축 이름>' 과 '✗ test 실패: <묶음 이름>' 줄이 실패한 곳이다.
+name: 전체 검사(check)
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.6"   # 고정 — 올릴 때는 로컬 uv 와 함께 올린다
+      - name: 의존성 설치(uv sync)
+        run: uv sync
+      - name: 전체 검사(test · lint)
+        env:
+          PYTHONIOENCODING: utf-8
+        run: python nova.py check

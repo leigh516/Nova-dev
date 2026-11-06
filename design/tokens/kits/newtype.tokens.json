@@ -1,0 +1,89 @@
+{
+  "$description": "newtype 킷 — design/tokens/brand.tokens.json 위에 덮는 부분 트리(같은 구조 · 같은 의미 토큰 이름). 값은 첨부 assets.zip(sha256 4e0406bc9351151e192a53fcd450f21ac522c5600047ebd337dc60781cacceb6) 의 css/newtype/newtype.css --nt-* 변수에서 옮겼다(원본 CSS 는 들이지 않는다 — ADR-016). 다크의 반투명 soft 색은 다크 표면(#1D2522) 위에 합성한 불투명 hex. 조정: 컨트롤 경계 line-2 #C9D3CF(바탕 대비 1.53) → #7A8682(3.48 이상).",
+  "primitive": {
+    "color": {
+      "neutral": {
+        "0": { "$value": "#FFFFFF" },
+        "50": { "$value": "#F4F6F5", "$description": "--nt-bg(라이트 바탕)" },
+        "100": { "$value": "#F8FAF9", "$description": "--nt-surface-2" },
+        "150": { "$value": "#E3E9E6", "$description": "--nt-ink(다크 본문 글자)" },
+        "200": { "$value": "#DDE3E0", "$description": "--nt-line" },
+        "300": { "$value": "#A9B5B0", "$description": "--nt-ink-2(다크 보조 글자)" },
+        "400": { "$value": "#8C9893", "$description": "--nt-ink-3(다크)" },
+        "500": { "$value": "#7A8682", "$description": "--nt-line-2 #C9D3CF 를 UI 경계 3:1 이상으로 조정" },
+        "600": { "$value": "#66726D", "$description": "--nt-ink-3(라이트)" },
+        "700": { "$value": "#4A5752", "$description": "--nt-ink-2(라이트)" },
+        "800": { "$value": "#2E3935", "$description": "--nt-line(다크)" },
+        "850": { "$value": "#1D2522", "$description": "--nt-surface(다크)" },
+        "900": { "$value": "#1F2A26", "$description": "--nt-ink(라이트 본문 글자)" },
+        "950": { "$value": "#151B19", "$description": "--nt-bg(다크 바탕)" }
+      },
+      "brand": {
+        "900": { "$value": "#0F3A2C", "$description": "--nt-side(사이드바 — 두 모드 모두 짙은 초록)" },
+        "700": { "$value": "#1B6B4A", "$description": "--nt-green-ink" },
+        "600": { "$value": "#1E7A5A", "$description": "--nt-green(주 색)" },
+        "300": { "$value": "#5BD3A5", "$description": "--nt-side-mark" },
+        "200": { "$value": "#CFE7DC", "$description": "--nt-side-text(사이드바 보조 글자)" },
+        "100": { "$value": "#E3F4EC", "$description": "--nt-green-soft" },
+        "dark100": { "$value": "#263D34", "$description": "--nt-green-soft 다크 rgba(95,211,160,.14) 를 #1D2522 위에 합성" }
+      },
+      "accent": {
+        "800": { "$value": "#8A5A00", "$description": "--nt-amber-text" },
+        "400": { "$value": "#F3C977", "$description": "--nt-side-warn" },
+        "300": { "$value": "#F2C66B", "$description": "--nt-amber-text(다크)" },
+        "100": { "$value": "#FDF3DC", "$description": "--nt-amber-soft" },
+        "dark100": { "$value": "#3B3C2C", "$description": "--nt-amber-soft 다크 rgba(242,198,107,.14) 합성" }
+      },
+      "green": {
+        "700": { "$value": "#1B6B4A", "$description": "--nt-ok-text(정상 · 대기)" },
+        "300": { "$value": "#5FD3A0", "$description": "--nt-green-text(다크)" },
+        "100": { "$value": "#E3F4EC", "$description": "--nt-green-soft" },
+        "dark100": { "$value": "#263D34", "$description": "--nt-green-soft 다크 합성" }
+      },
+      "red": {
+        "700": { "$value": "#B42318", "$description": "--nt-red" },
+        "300": { "$value": "#F59A8E", "$description": "--nt-red-text(다크)" },
+        "100": { "$value": "#FDECEA", "$description": "--nt-red-soft" },
+        "dark100": { "$value": "#3B3531", "$description": "--nt-red-soft 다크 rgba(245,154,142,.14) 합성" }
+      },
+      "blue": {
+        "700": { "$value": "#1D5FB8", "$description": "--nt-blue(통화 · 응대 = 정보)" },
+        "300": { "$value": "#8FB8F5", "$description": "--nt-blue-text(다크)" },
+        "100": { "$value": "#E8F0FC", "$description": "--nt-blue-soft" },
+        "dark100": { "$value": "#2A3943", "$description": "--nt-blue-soft 다크 rgba(110,160,240,.16) 합성" }
+      },
+      "violet": {
+        "700": { "$value": "#5B4B9E", "$description": "--nt-violet" },
+        "300": { "$value": "#B9ABF2", "$description": "--nt-violet-text(다크)" },
+        "100": { "$value": "#ECE8F7", "$description": "--nt-violet-soft" },
+        "dark100": { "$value": "#2A2440", "$description": "--nt-violet-soft(다크)" }
+      }
+    },
+    "radius": {
+      "sm": { "$value": { "value": 7, "unit": "px" }, "$description": "--nt-ctl-r(입력칸)" },
+      "md": { "$value": { "value": 12, "unit": "px" }, "$description": "--nt-radius" },
+      "xl": { "$value": { "value": 20, "unit": "px" }, "$description": "--nt-panel-radius" }
+    },
+    "font": {
+      "family": {
+        "base": { "$value": ["Pretendard Variable", "Pretendard", "-apple-system", "BlinkMacSystemFont", "Malgun Gothic", "sans-serif"] },
+        "mono": { "$value": ["JetBrains Mono", "Consolas", "D2Coding", "monospace"] }
+      }
+    }
+  },
+  "semantic": {
+    "color": {
+      "text": {
+        "primary": { "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.150}" } } },
+        "secondary": { "$extensions": { "nova.modes": { "dark": "{primitive.color.neutral.300}" } } },
+        "onNavMuted": { "$value": "{primitive.color.brand.200}", "$extensions": { "nova.modes": { "dark": "{primitive.color.brand.200}" } } }
+      },
+      "status": {
+        "$description": "newtype 은 정보(통화 · 응대)가 파랑, 성공(대기 · 정상)이 초록 — 브랜드 초록을 정보색으로 두면 성공색과 겹친다(REQ-261106-04-4)",
+        "infoFg": { "$value": "{primitive.color.blue.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.300}" } } },
+        "infoBg": { "$value": "{primitive.color.blue.100}", "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.dark100}" } } },
+        "infoSolid": { "$value": "{primitive.color.blue.700}", "$extensions": { "nova.modes": { "dark": "{primitive.color.blue.300}" } } }
+      }
+    }
+  }
+}

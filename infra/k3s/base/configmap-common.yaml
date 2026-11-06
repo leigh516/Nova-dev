@@ -1,0 +1,35 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nova-common
+  namespace: core
+data:
+  KAFKA_BOOTSTRAP: "kafka.infra.svc.cluster.local:9092"
+  OUTBOX_RELAY_INTERVAL: "0.2"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_URL: "http://prometheus.observability.svc.cluster.local:9090"
+  GW_CORS_ORIGINS: "https://nova.local"
+  NOVA_PACKS: ""
+  NOVA_SUPER_ROLE: "admin"
+  NOVA_TZ_OFFSET_HOURS: "9"
+  SVC_SAMPLE_URL: "http://sample.core.svc.cluster.local:8000"
+  SVC_GATEWAY_URL: "http://gateway.edge.svc.cluster.local:8000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nova-common
+  namespace: edge
+data:
+  KAFKA_BOOTSTRAP: "kafka.infra.svc.cluster.local:9092"
+  OUTBOX_RELAY_INTERVAL: "0.2"
+  LOG_LEVEL: "INFO"
+  PROMETHEUS_URL: "http://prometheus.observability.svc.cluster.local:9090"
+  GW_CORS_ORIGINS: "https://nova.local"
+  NOVA_PACKS: ""
+  NOVA_SUPER_ROLE: "admin"
+  NOVA_TZ_OFFSET_HOURS: "9"
+  SVC_SAMPLE_URL: "http://sample.core.svc.cluster.local:8000"
+  SVC_GATEWAY_URL: "http://gateway.edge.svc.cluster.local:8000"
+---

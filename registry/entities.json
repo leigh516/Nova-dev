@@ -1,0 +1,78 @@
+{
+ "$comment": "개념 원장 현재 상태 — 생성물: registry/entities.jsonl(이력)을 재생해 scripts/naming.py 가 쓴다. 손으로 고치지 않는다(python nova.py naming entity|alias|retire|layer).",
+ "entities": {
+  "item": {
+   "key": "item",
+   "title_ko": "항목",
+   "service": "sample",
+   "table": "item",
+   "layer": "core",
+   "pack": null,
+   "lookup_aliases": [
+    "항목",
+    "아이템"
+   ],
+   "forbidden_aliases": [
+    "entry"
+   ],
+   "status": "active",
+   "since": "2026-11-04",
+   "note": "샘플 업무 개체 — 목록 화면 한 줄의 일반 이름(용어집 항목). 첫 업무 서비스가 생기면 샘플과 함께 은퇴"
+  },
+  "item_activity": {
+   "key": "item_activity",
+   "title_ko": "항목 활동 기록",
+   "service": "sample",
+   "table": "item_activity",
+   "layer": "core",
+   "pack": null,
+   "lookup_aliases": [
+    "항목 활동",
+    "항목 이력",
+    "활동 기록"
+   ],
+   "forbidden_aliases": [
+    "item_event"
+   ],
+   "status": "active",
+   "since": "2026-11-04",
+   "note": "샘플 — sample.item.* 소비 결과(멱등). item_event 는 이벤트(토픽)와 헷갈려 쓰지 않는다"
+  },
+  "outbox": {
+   "key": "outbox",
+   "title_ko": "아웃박스",
+   "service": "*",
+   "table": "outbox",
+   "layer": "platform",
+   "pack": null,
+   "lookup_aliases": [
+    "발행 대기열",
+    "아웃박스"
+   ],
+   "forbidden_aliases": [
+    "event_queue"
+   ],
+   "status": "active",
+   "since": "2026-11-04",
+   "note": "nova_common.db — 모든 DB 서비스 공통. 업무 데이터와 같은 트랜잭션으로 이벤트를 남긴다"
+  },
+  "processed_event": {
+   "key": "processed_event",
+   "title_ko": "처리한 이벤트",
+   "service": "*",
+   "table": "processed_event",
+   "layer": "platform",
+   "pack": null,
+   "lookup_aliases": [
+    "멱등 소비 기록",
+    "처리 이벤트"
+   ],
+   "forbidden_aliases": [
+    "consumed_event"
+   ],
+   "status": "active",
+   "since": "2026-11-04",
+   "note": "nova_common.db — 모든 DB 서비스 공통. (event_id, consumer) 로 같은 이벤트를 두 번 처리하지 않는다"
+  }
+ }
+}

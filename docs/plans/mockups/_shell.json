@@ -1,0 +1,12 @@
+{
+  "$comment": "목업 셸 설정 — scripts/mockup_shots.py 가 목업 본문을 실제 AppShell 과 같은 모양으로 감쌀 때 쓴다. 앱을 추가하면 web/apps/<앱>/lib/app.ts 의 APP 설정과 같게 적는다. links = [경로, 이름, 아이콘].",
+  "brand": "Nova",
+  "apps": {
+    "app": {
+      "product": "샘플 앱",
+      "layout": "top",
+      "user": "사용자",
+      "links": [["/", "홈", ""], ["/items", "항목", ""], ["/design", "디자인", ""]]
+    }
+  }
+}

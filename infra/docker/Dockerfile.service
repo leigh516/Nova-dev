@@ -1,0 +1,23 @@
+# 파이썬 서비스 공통 Dockerfile — docker build -f infra/docker/Dockerfile.service --build-arg SERVICE=sample .
+# 의존성은 uv.lock 그대로(ADR-002). 자원 효율: slim 베이스 · 멀티스테이지 · 비루트 · uvicorn 단일 워커(수평 확장은 HPA)
+FROM python:3.12-slim AS build
+COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PROJECT_ENVIRONMENT=/venv UV_PYTHON_DOWNLOADS=never
+WORKDIR /src
+COPY pyproject.toml uv.lock .python-version ./
+COPY packages/common-py /src/packages/common-py
+RUN uv sync --frozen --no-dev --all-packages --no-editable
+
+FROM python:3.12-slim
+ARG SERVICE
+ENV SERVICE=${SERVICE} PATH=/venv/bin:$PATH PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 NOVA_PACKS_ROOT=/app
+WORKDIR /app
+RUN useradd -r -u 10001 app && mkdir -p /app/data && chown app /app/data
+COPY --from=build /venv /venv
+COPY services/${SERVICE} /app/svc
+# 도메인 팩(STD-DOMAIN-PACK-001) — 켜는 것은 NOVA_PACKS(ConfigMap)
+COPY packs /app/packs
+USER 10001
+EXPOSE 8000
+HEALTHCHECK --interval=15s --timeout=3s CMD python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/healthz')"
+CMD ["sh", "-c", "cd /app/svc && exec uvicorn $(python -m nova_common.catalog package $SERVICE).main:app --host 0.0.0.0 --port 8000 --workers 1 --no-access-log --timeout-graceful-shutdown 20"]

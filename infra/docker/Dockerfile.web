@@ -1,0 +1,23 @@
+# Next.js 웹 앱 공통 — docker build -f infra/docker/Dockerfile.web --build-arg APP=app --build-arg NEXT_PUBLIC_API_BASE=https://api.<도메인>/v1 .
+# 브라우저가 부르는 게이트웨이 주소는 빌드 시점에 번들에 들어간다(NEXT_PUBLIC_*). 클러스터 내부 DNS 는 브라우저에서 해석되지 않는다
+FROM node:20-alpine AS build
+ARG APP
+ARG NEXT_PUBLIC_API_BASE=http://localhost:8080/v1
+ENV NEXT_PUBLIC_API_BASE=${NEXT_PUBLIC_API_BASE}
+WORKDIR /web
+# 잠금 파일은 필수 — 없으면 COPY 가 실패해 빌드가 멈춘다(글롭 * 는 없어도 통과시켜 잠금 없는 빌드를 허용했다)
+COPY web/package.json web/package-lock.json web/tsconfig.base.json ./
+COPY web/packages ./packages
+COPY web/apps/${APP} ./apps/${APP}
+# npm ci 만 — 잠금 파일과 package.json 이 어긋나면 실패한다. `|| npm install` 대체 경로는 조용히 다른 의존성 판본을 받았다
+RUN npm ci --workspaces --include-workspace-root
+RUN npm run build -w apps/${APP}
+
+FROM node:20-alpine
+ARG APP
+ENV NODE_ENV=production PORT=3000 APP=${APP}
+WORKDIR /web
+COPY --from=build /web /web
+USER node
+EXPOSE 3000
+CMD ["sh", "-c", "npm run start -w apps/$APP"]

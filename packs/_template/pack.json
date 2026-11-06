@@ -1,0 +1,14 @@
+{
+  "name": "__PACK__",
+  "title": "__TITLE__",
+  "description": "(이 팩이 다루는 업종 · 고객군)",
+  "extends": [],
+  "entities": [],
+  "variation_points": {
+    "glossary": "glossary.md",
+    "policies": "policies/",
+    "schema": "schema/",
+    "screens": "screens.json",
+    "workflows": "workflows/"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "example",
+  "title": "예시 팩",
+  "description": "도메인 팩 동작 예시 — 샘플 서비스의 이름 정규화 규칙을 '공백 하나로 접기'로 바꾼다",
+  "extends": ["sample"],
+  "entities": [],
+  "variation_points": {"glossary": "glossary.md", "policies": "policies/"}
+}

@@ -1,0 +1,46 @@
+# MariaDB — 서비스별 스키마 · 전용 계정(교차 접근 불가, "서비스는 자기 DB만"). 운영은 관리형 DB 또는 Galera 로 교체.
+# 손으로 관리하는 파일 — 프로젝트 이름을 쓰지 않는다(접근 허용 NetworkPolicy · 초기화 SQL 은 gen_k3s 가 만든다).
+apiVersion: v1
+kind: Secret
+metadata: {name: mariadb-root, namespace: infra}
+type: Opaque
+stringData: {password: dev-root-pw}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: mariadb, namespace: infra, labels: {app: mariadb}}
+spec:
+  selector: {app: mariadb}
+  ports: [{name: mysql, port: 3306}]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: {name: mariadb, namespace: infra, labels: {app: mariadb}}
+spec:
+  serviceName: mariadb
+  replicas: 1
+  selector: {matchLabels: {app: mariadb}}
+  template:
+    metadata: {labels: {app: mariadb}}
+    spec:
+      containers:
+      - name: mariadb
+        image: mariadb:11.4
+        args: ["--innodb-buffer-pool-size=128M", "--max-connections=120", "--performance-schema=OFF", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+        env:
+        - {name: MARIADB_ROOT_PASSWORD, valueFrom: {secretKeyRef: {name: mariadb-root, key: password}}}
+        ports: [{name: mysql, containerPort: 3306}]
+        resources:
+          requests: {cpu: 100m, memory: 256Mi}
+          limits: {memory: 512Mi}
+        readinessProbe: {exec: {command: ["healthcheck.sh", "--connect", "--innodb_initialized"]}, initialDelaySeconds: 15, periodSeconds: 10}
+        volumeMounts:
+        - {name: data, mountPath: /var/lib/mysql}
+        - {name: init, mountPath: /docker-entrypoint-initdb.d}
+      volumes: [{name: init, configMap: {name: mariadb-init}}]
+  volumeClaimTemplates:
+  - metadata: {name: data}
+    spec:
+      accessModes: [ReadWriteOnce]
+      storageClassName: local-path
+      resources: {requests: {storage: 5Gi}}

@@ -1,0 +1,50 @@
+# release 브랜치 앞당기기 — GitHub Release(정식)를 공개하면 release 브랜치를 그 태그 커밋으로 fast-forward 한다.
+# release 는 템플릿 기본 브랜치다 → 'Use this template' 으로 받으면 언제나 최신 정식본(규약 docs/conventions/versioning.md).
+# 앞당기기만 한다 — 되감기 · 강제 푸시는 하지 않는다. ff 가 안 되면 실패하고 멈춘다(사람이 본다).
+# 복제본(Nova 에서 만든 프로젝트)에서는 돌지 않는다 — nova.project.json 의 slug 가 nova 이고 git_remote 가 이 저장소일 때만.
+name: release 브랜치 앞당기기
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  fast-forward:
+    # 사전 판본(rc)은 템플릿에 내보내지 않는다
+    if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: 원천 저장소인지 확인
+        id: source
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          meta = json.load(open("nova.project.json", encoding="utf-8"))
+          norm = lambda u: u.strip().lower().removesuffix(".git").rstrip("/")
+          here = norm(os.environ["GITHUB_SERVER_URL"] + "/" + os.environ["GITHUB_REPOSITORY"])
+          ok = meta.get("slug") == "nova" and norm(meta.get("git_remote", "")) == here
+          print("source=" + ("true" if ok else "false"))
+          PY
+      - name: 앞당기기(fast-forward 만)
+        if: steps.source.outputs.source == 'true'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          case "$TAG" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "✗ 정식 태그 형식이 아니다: $TAG"; exit 1;; esac
+          case "$TAG" in *-*) echo "✗ 사전 판본 태그는 앞당기지 않는다: $TAG"; exit 1;; esac
+          target=$(git rev-parse "refs/tags/$TAG^{commit}")
+          if git ls-remote --exit-code --heads origin release > /dev/null; then
+            git fetch -q origin release
+            if ! git merge-base --is-ancestor FETCH_HEAD "$target"; then
+              echo "✗ release 브랜치가 $TAG 의 조상이 아니다 — 되감기 · 강제 푸시는 하지 않는다. 사람이 확인한다"
+              exit 1
+            fi
+          fi
+          git push origin "$target:refs/heads/release"
+          echo "✓ release → $TAG ($target)"

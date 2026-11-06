@@ -1,0 +1,20 @@
+<!-- mockup: {"app": "bare", "title": "로그인 — 이메일 형식 칸 오류(바뀐 뒤)", "width": 1280} -->
+<!-- T04-1.06 · plan_REQ_04 §4 · §4.1 H5 · H9 — LoginPage 템플릿 그대로. 새로 생기는 것(mock-new): 보내기 전 이메일 형식 확인 → 이메일 칸 아래 오류(서버 422 칸 오류도 같은 자리, T04-4.02) -->
+<!-- 셸: 로그인 전 AppShell 은 사용자 칩 대신 로그인 버튼(AppShell.tsx) -->
+<header class="topbar"><div class="topbar-in"><a class="brand"><span class="mark">N</span>Nova<small class="product">샘플 앱</small></a><nav class="nav grow"><a href="#">홈</a><a href="#">항목</a><a href="#">디자인</a></nav><a class="iconbtn">?</a><button class="iconbtn">◐</button><a class="btn primary sm">로그인</a></div></header>
+<main>
+<div class="login-wrap">
+  <form class="card stack login-card" novalidate>
+    <div class="brand"><span class="mark" aria-hidden="true">N</span>Nova</div>
+    <div><h2>로그인</h2><p class="muted small mt-1">Nova 샘플 앱에 들어가려면 로그인하세요</p></div>
+    <div class="field mock-new">
+      <label for="em">이메일<span class="req">*</span></label>
+      <input id="em" class="input" type="email" value="user@" aria-invalid="true" aria-describedby="em-err" autocomplete="username">
+      <span id="em-err" class="err" role="alert">이메일 형식이 아닙니다. 예: name@example.com</span>
+    </div>
+    <div class="field"><label for="pw">비밀번호<span class="req">*</span></label><input id="pw" class="input" type="password" value="••••••••" autocomplete="current-password"></div>
+    <button class="btn primary lg block" type="submit">로그인</button>
+    <p class="xs muted">운영 빌드 — 개발용 계정 버튼은 나오지 않습니다</p>
+  </form>
+</div>
+</main>

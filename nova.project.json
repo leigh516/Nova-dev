@@ -1,0 +1,57 @@
+{
+  "name": "Nova",
+  "slug": "nova",
+  "description": "공통개발플랫폼 — 모든 신규 프로그램의 출발점(문서 프로세스·백엔드 공통·인프라 생성기·디자인 시스템·웹/모바일 골격)",
+  "owner": "jongyeolhan",
+  "git_remote": "https://github.com/nicomms6925/Nova-dev",
+  "locale": "ko-KR",
+  "timezone": "Asia/Seoul",
+  "tz_offset_hours": 9,
+  "py_package": "nova_common",
+  "env_prefix": "NOVA",
+  "metric_prefix": "nova",
+  "kt_package": "kr.nova",
+  "npm_scope": "@nova",
+  "image_registry": "ghcr.io/nicomms6925/nova",
+  "domain": "nova.local",
+  "label_domain": "nova.dev",
+  "super_role": "admin",
+  "web_apps": [
+    {
+      "name": "app",
+      "port": 3000,
+      "title": "Nova 샘플 앱",
+      "scope": "WAPP"
+    }
+  ],
+  "packs": [],
+  "standards": {
+    "STD-TENANCY-001": {
+      "decision": "적용",
+      "model": "M1",
+      "reason": "플랫폼은 여러 조직이 쓰는 SaaS 를 기본으로 지원 — 공유 스키마 tenant_id + 컨텍스트 전파(nova_common.context)",
+      "date": "2026-11-04",
+      "by": "jongyeolhan"
+    },
+    "STD-DOMAIN-PACK-001": {
+      "decision": "적용",
+      "reason": "포트 · 팩 구조(nova_common.packs · packs/)를 플랫폼이 제공 — 프로젝트는 두 번째 업종이 보일 때 팩을 만든다",
+      "date": "2026-11-04",
+      "by": "jongyeolhan"
+    },
+    "STD-AX-001": {
+      "decision": "적용",
+      "default_level": "L1",
+      "reason": "AI 도 같은 권한 검사 · actor_type 감사 분리를 플랫폼이 강제, 기능별 등급은 계획서 §0 에서",
+      "date": "2026-11-04",
+      "by": "jongyeolhan"
+    }
+  },
+  "version": "0.2.0",
+  "profile": {
+    "value": "platform",
+    "why": "공통개발플랫폼 자신 — 다른 프로젝트가 물려받는 규칙 · 코드를 만든다: 전체 착수 · 마스터플랜 봉인 · 이력 하한 보통 일",
+    "date": "2026-11-04",
+    "history": []
+  }
+}

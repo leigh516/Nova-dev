@@ -1,0 +1,38 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 운영 DB 서비스 계정 프로비저닝 — 스크립트는 db-provision.sh(ConfigMap db-provision). 끝나고 10분 뒤 지워진다:
+# 다시 apply 하면 새 Job 이 만들어져(불변 필드 오류 없음) 계정을 확인하고 비밀번호를 동기화한다
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-provision
+  namespace: infra
+  labels: {app: db-provision}
+spec:
+  backoffLimit: 6
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels: {app: db-provision}
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 999, runAsGroup: 999, seccompProfile: {type: RuntimeDefault}}
+      containers:
+      - name: provision
+        image: mariadb:11.4
+        command: [bash, /scripts/db-provision.sh]
+        env:
+        - {name: MYSQL_PWD, valueFrom: {secretKeyRef: {name: mariadb-root, key: password}}}
+        - {name: DB_HOST, value: mariadb.infra.svc.cluster.local}
+        envFrom:
+        - secretRef: {name: nova-db-provision}
+        resources:
+          requests: {cpu: 10m, memory: 32Mi}
+          limits: {memory: 128Mi}
+        securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+        volumeMounts:
+        - {name: script, mountPath: /scripts, readOnly: true}
+        - {name: tmp, mountPath: /tmp}
+      volumes:
+      - {name: script, configMap: {name: db-provision}}
+      - {name: tmp, emptyDir: {sizeLimit: 16Mi}}

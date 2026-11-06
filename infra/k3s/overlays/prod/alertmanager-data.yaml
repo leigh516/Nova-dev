@@ -1,0 +1,9 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+# 운영 Alertmanager 저장소 — 침묵 · 발송 기록이 재시작 뒤에도 남는다(base 는 emptyDir)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: alertmanager-data, namespace: observability, labels: {app: alertmanager}}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: local-path
+  resources: {requests: {storage: 1Gi}}

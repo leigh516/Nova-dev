@@ -1,0 +1,824 @@
+<!doctype html>
+<!-- 생성물: scripts/checklist.py — 원천 scripts/checklist_form/{tree.json,template.html} · docs/product/checklist_prefill.json · 손으로 고치지 않는다(uv run python scripts/checklist.py build) -->
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>요구 체크리스트</title>
+<style>
+/*__TOKENS__*/
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-bg-canvas); color: var(--color-text-primary);
+  font-family: var(--font-family-base); font-size: var(--font-size-md); line-height: 1.55; }
+button, input, textarea, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+header { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center;
+  padding: var(--space-3) var(--space-4); background: var(--color-bg-surface); border-bottom: 1px solid var(--color-border-subtle); }
+header h1 { font-size: var(--font-size-lg); margin: 0; font-weight: var(--font-weight-bold); }
+.grow { flex: 1; }
+.bar { height: 8px; width: 140px; background: var(--color-bg-subtle); border-radius: var(--radius-pill); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--color-action-primary); }
+.muted { color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.btn { border: 1px solid var(--color-border-control); background: var(--color-bg-surface); border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3); cursor: pointer; min-height: 40px; }
+.btn:hover { background: var(--color-bg-subtle); }
+.btn.primary { background: var(--color-action-primary); color: var(--color-action-on-primary); border-color: transparent; }
+.btn.sm { min-height: 32px; padding: 2px var(--space-3); font-size: var(--font-size-sm); }
+.seg { display: inline-flex; border: 1px solid var(--color-border-control); border-radius: var(--radius-md); overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: var(--space-2) var(--space-3); cursor: pointer; min-height: 38px; }
+.seg button[aria-pressed="true"] { background: var(--color-brand-100); color: var(--color-text-brand); font-weight: var(--font-weight-semibold); }
+:root[data-theme="dark"] .seg button[aria-pressed="true"] { background: var(--color-brand-dark100); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .seg button[aria-pressed="true"] { background: var(--color-brand-dark100); } }
+.wrap { display: grid; grid-template-columns: 250px minmax(0, 1fr); max-width: 1220px; margin: 0 auto; gap: var(--space-6); padding: var(--space-4); }
+.wrap > * { min-width: 0; }
+nav ol { list-style: none; margin: 0; padding: 0; position: sticky; top: 76px; max-height: calc(100vh - 90px); overflow-y: auto; }
+nav button { width: 100%; text-align: left; display: flex; gap: var(--space-2); align-items: center; border: 0; background: transparent;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); cursor: pointer; min-height: 38px; }
+nav button[aria-current="true"] { background: var(--color-bg-surface); box-shadow: inset 3px 0 0 var(--color-action-primary); font-weight: var(--font-weight-semibold); }
+nav .cnt { margin-left: auto; font-size: var(--font-size-xs); color: var(--color-text-muted); }
+nav .done .cnt { color: var(--color-status-success-fg); }
+nav .off button { color: var(--color-text-muted); text-decoration: line-through; }
+section.card { background: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); padding: var(--space-5); margin-bottom: var(--space-4); }
+.sechead { display: flex; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; }
+.sechead h2 { margin: 0; font-size: var(--font-size-xl); }
+section.card.off .q { display: none; }
+.q { padding: var(--space-4) 0; border-top: 1px solid var(--color-border-subtle); }
+.q.first { border-top: 0; }
+.qhead { display: flex; gap: var(--space-2); align-items: flex-start; }
+.qt { font-weight: var(--font-weight-semibold); margin: 0 0 var(--space-2); display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; flex: 1; }
+.q.skipped .body { display: none; }
+.q.skipped .qt { color: var(--color-text-muted); }
+.kids { margin: var(--space-3) 0 0 var(--space-2); padding-left: var(--space-4); border-left: 2px solid var(--color-brand-300); }
+.kids .q { border-top: 0; padding: var(--space-2) 0; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chips.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.chip { position: relative; display: inline-flex; flex-direction: column; justify-content: center; gap: 2px; border: 1px solid var(--color-border-control);
+  border-radius: var(--radius-pill); padding: var(--space-2) var(--space-4); cursor: pointer; min-height: 40px; background: var(--color-bg-surface); user-select: none; }
+.cards .chip { border-radius: var(--radius-md); align-items: flex-start; padding: var(--space-3); }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:hover { border-color: var(--color-action-primary); }
+.chip:has(input:checked) { background: var(--color-brand-100); border-color: var(--color-action-primary); box-shadow: inset 0 0 0 1px var(--color-action-primary); }
+:root[data-theme="dark"] .chip:has(input:checked) { background: var(--color-brand-dark100); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .chip:has(input:checked) { background: var(--color-brand-dark100); } }
+.chip:has(input:focus-visible) { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.chip .lab { font-weight: var(--font-weight-medium); display: flex; gap: var(--space-1); align-items: center; flex-wrap: wrap; }
+.chip:has(input:checked) .lab::before { content: "✓"; color: var(--color-text-brand); font-weight: var(--font-weight-bold); }
+.chip .desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.chip .warn { font-size: var(--font-size-sm); color: var(--color-status-warning-fg); }
+.chip .more { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+textarea, input[type=text], select { width: 100%; border: 1px solid var(--color-border-control); background: var(--color-bg-surface); border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3); min-height: 40px; }
+textarea { min-height: 76px; resize: vertical; }
+.other { margin-top: var(--space-2); }
+.badge { font-size: var(--font-size-xs); border-radius: var(--radius-pill); padding: 1px var(--space-2); font-weight: var(--font-weight-medium); white-space: nowrap; }
+.badge.prefill { background: var(--color-status-warning-bg); color: var(--color-status-warning-fg); }
+.badge.ok { background: var(--color-status-success-bg); color: var(--color-status-success-fg); }
+.badge.std, .badge.feeds { background: var(--color-status-info-bg); color: var(--color-status-info-fg); }
+.badge.todo { background: var(--color-status-danger-bg); color: var(--color-status-danger-fg); }
+.badge.rec { background: var(--color-status-success-bg); color: var(--color-status-success-fg); }
+.badge.skip { background: var(--color-status-neutral-bg); color: var(--color-status-neutral-fg); }
+details.help { margin: 0 0 var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+details.help summary { cursor: pointer; color: var(--color-text-brand); width: fit-content; }
+details.help p { margin: var(--space-1) 0 0; padding: var(--space-2) var(--space-3); background: var(--color-bg-subtle); border-radius: var(--radius-md); white-space: pre-line; }
+.evid { margin-top: var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); background: var(--color-bg-subtle);
+  border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); display: flex; gap: var(--space-3); align-items: flex-start; flex-wrap: wrap; }
+.evid ul { margin: 0; padding-left: var(--space-4); flex: 1; min-width: 200px; }
+.hint { font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: var(--space-1); }
+.switch { display: inline-flex; align-items: center; gap: var(--space-2); border: 0; background: transparent; cursor: pointer; padding: 2px; font-size: var(--font-size-sm);
+  color: var(--color-text-secondary); white-space: nowrap; min-height: 32px; }
+.switch .track { width: 36px; height: 20px; border-radius: var(--radius-pill); background: var(--color-border-control); position: relative; flex: 0 0 auto; }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--color-bg-surface); transition: left .15s; }
+.switch[aria-checked="true"] .track { background: var(--color-action-primary); }
+.switch[aria-checked="true"] .track::after { left: 18px; }
+.rows { width: 100%; border-collapse: collapse; }
+.rows th, .rows td { border-bottom: 1px solid var(--color-border-subtle); padding: var(--space-1); text-align: left; font-size: var(--font-size-sm); vertical-align: top; }
+.status { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4); }
+.status.draft { background: var(--color-status-neutral-bg); color: var(--color-status-neutral-fg); }
+.status.complete { background: var(--color-status-success-bg); color: var(--color-status-success-fg); }
+.sum h3 { margin: var(--space-4) 0 var(--space-2); font-size: var(--font-size-md); }
+.sum ul { margin: 0; padding-left: var(--space-5); }
+dl.terms { display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: var(--space-2) var(--space-4); margin: 0; }
+dl.terms dt { font-weight: var(--font-weight-semibold); }
+dl.terms dd { margin: 0; color: var(--color-text-secondary); }
+.toast { position: fixed; bottom: var(--space-4); left: 50%; transform: translateX(-50%); background: var(--color-bg-inverse); color: var(--color-text-inverse);
+  padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); display: none; z-index: 10; max-width: calc(100vw - 32px); }
+/* 색 고르기 — 견본 · 직접 지정 · 세밀 조정 · 대비 미리보기(고객이 고른 색은 값 그대로 보여 준다) */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: var(--space-2); }
+.sw { border: 1px solid var(--color-border-control); background: var(--color-bg-surface); border-radius: var(--radius-md); padding: var(--space-2);
+  cursor: pointer; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; text-align: left; min-height: 84px; }
+.sw .dot { width: 100%; height: 32px; border-radius: var(--radius-sm); border: 1px solid rgba(0,0,0,.08); }
+.sw .nm { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+.sw .hx { font-size: var(--font-size-xs); color: var(--color-text-muted); font-family: var(--font-family-mono); }
+.sw[aria-checked="true"] { border-color: var(--color-action-primary); box-shadow: inset 0 0 0 2px var(--color-action-primary); }
+.sw[aria-checked="true"] .nm::before { content: "✓"; color: var(--color-text-brand); font-weight: var(--font-weight-bold); }
+.custom { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); align-items: center; margin-top: var(--space-3); }
+.custom input[type=color] { width: 48px; height: 40px; padding: 2px; border: 1px solid var(--color-border-control); border-radius: var(--radius-md); background: var(--color-bg-surface); cursor: pointer; }
+.custom input[type=text] { width: 130px; font-family: var(--font-family-mono); }
+.sliders { display: grid; grid-template-columns: 72px 1fr 48px; gap: var(--space-2); align-items: center; margin-top: var(--space-2); font-size: var(--font-size-sm); }
+.sliders input[type=range] { width: 100%; }
+.cpv { margin-top: var(--space-3); display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--space-2); }
+.cpv .tile { border-radius: var(--radius-md); padding: var(--space-3); border: 1px solid var(--color-border-subtle); font-size: var(--font-size-sm); }
+.cpv .sbtn { display: inline-block; padding: 6px 14px; border-radius: 8px; color: #fff; font-weight: 600; }
+.cpv .ok { color: var(--color-status-success-fg); font-weight: var(--font-weight-semibold); }
+.cpv .bad { color: var(--color-status-danger-fg); font-weight: var(--font-weight-semibold); }
+/* 보기 미리보기 */
+.pv { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+.pv .box { width: 46px; height: 26px; border: 2px solid var(--color-action-primary); background: var(--color-brand-100); }
+.pv .lines i { display: block; width: 46px; height: 4px; background: var(--color-border-control); border-radius: 2px; }
+.pv .wf { width: 64px; height: 40px; border: 1px solid var(--color-border-control); border-radius: 4px; position: relative; background: var(--color-bg-surface); overflow: hidden; }
+.pv .wf b { position: absolute; background: var(--color-brand-300); }
+.pv .sample { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+/* 분류별 보기 묶음 · 새 미리보기(REQ-261104-18) — 색은 토큰 변수, 분위기 견본의 브랜드 색만 데이터 HEX(색 견본과 같은 방식) */
+.grp + .grp { margin-top: var(--space-3); }
+.grp .gh { margin: 0 0 var(--space-1); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-muted); }
+.pv .mood { box-sizing: border-box; width: 112px; display: flex; flex-direction: column; border: 1px solid var(--color-border-control); background: var(--color-bg-surface); overflow: hidden; }
+.pv .mood i { display: block; flex: none; height: 4px; width: 70%; background: var(--color-border-control); border-radius: var(--radius-sm); }
+.pv .mood .bar { display: block; height: 8px; flex: none; border-radius: var(--radius-sm); }
+.pv .mood .cta { display: block; flex: none; width: 38px; height: 12px; align-self: flex-end; }
+.pv .mood.dark { background: var(--color-neutral-900); border-color: var(--color-neutral-700); }
+.pv .mood.dark i { background: var(--color-neutral-700); }
+.pv.sws .sq { width: 18px; height: 18px; border-radius: var(--radius-sm); border: 1px solid var(--color-border-subtle); }
+.pv .shp { display: inline-flex; align-items: center; justify-content: center; min-width: 56px; height: 24px; padding: 0 var(--space-2); font-size: var(--font-size-xs); border-radius: var(--radius-md); }
+.pv .shp.btn_solid { background: var(--color-action-primary); color: var(--color-action-on-primary); }
+.pv .shp.btn_outline { border: 1px solid var(--color-action-primary); color: var(--color-text-brand); }
+.pv .shp.btn_soft { background: var(--color-brand-100); color: var(--color-text-brand); }
+.pv .shp.in_box { width: 84px; justify-content: flex-start; border: 1px solid var(--color-border-control); background: var(--color-bg-surface); color: var(--color-text-muted); }
+.pv .shp.in_line { width: 84px; justify-content: flex-start; border-radius: 0; border-bottom: 1px solid var(--color-border-control); color: var(--color-text-muted); }
+.pv .shp.in_fill { width: 84px; justify-content: flex-start; background: var(--color-bg-subtle); color: var(--color-text-muted); }
+.pv .tb { display: grid; width: 72px; border-radius: var(--radius-sm); overflow: hidden; }
+.pv .tb i { display: block; height: 8px; }
+.pv .tb.tb_lines i + i { border-top: 1px solid var(--color-border-subtle); }
+.pv .tb.tb_stripe i:nth-child(odd) { background: var(--color-bg-subtle); }
+.pv .tb.tb_grid { border: 1px solid var(--color-border-control); }
+.pv .tb.tb_grid i { background: linear-gradient(90deg, transparent 32%, var(--color-border-control) 32% 34%, transparent 34% 66%, var(--color-border-control) 66% 68%, transparent 68%); }
+.pv .tb.tb_grid i + i { border-top: 1px solid var(--color-border-control); }
+.pv .cd { width: 56px; height: 34px; border-radius: var(--radius-md); background: var(--color-bg-surface); }
+.pv .cd.cd_both { border: 1px solid var(--color-border-subtle); box-shadow: var(--elevation-card); }
+.pv .cd.cd_border { border: 1px solid var(--color-border-control); }
+.pv .cd.cd_shadow { box-shadow: var(--elevation-overlay); }
+.pv .cd.cd_fill { background: var(--color-bg-subtle); }
+.pv .spin { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--color-border-subtle); border-top-color: var(--color-action-primary); }
+.pv .wf b.ink { background: var(--color-bg-inverse); }
+.pv .wf b.ghost { background: var(--color-bg-subtle); }
+/* 디자인 실시간 미리보기 */
+.dpv { border: 1px dashed var(--color-border-control); border-radius: var(--radius-lg); padding: var(--space-3); margin: var(--space-3) 0 var(--space-2); }
+.dpv .frame { border-radius: 10px; overflow: hidden; display: grid; min-height: 230px; border: 1px solid rgba(127,127,127,.3); }
+.dpv .hd { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-weight: 700; }
+.dpv .nv { display: flex; gap: 6px; padding: 8px; font-size: 13px; }
+.dpv .nv span { padding: 4px 8px; border-radius: 6px; }
+.dpv .ct { padding: 12px; display: grid; gap: 10px; align-content: start; }
+.dpv .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dpv .card { padding: 10px; }
+.dpv .tbl { display: grid; gap: 0; }
+.dpv .tbl div { display: grid; grid-template-columns: 2fr 1fr 1fr; padding: 6px 8px; font-size: 13px; }
+/* Nova 보기 갤러리 · 목업 채택표 */
+.gl { border: 0; background: transparent; color: var(--color-text-brand); font-size: var(--font-size-xs); cursor: pointer; padding: 2px 4px; text-decoration: underline; }
+.gcard { scroll-margin-top: 90px; }
+.gcard .ex { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); padding: var(--space-3); background: var(--color-bg-canvas); margin: var(--space-2) 0; }
+.gcard img { max-width: 100%; border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); margin-top: var(--space-2); }
+.gcard ul { margin: var(--space-1) 0; padding-left: var(--space-5); }
+.gx-btn { display: inline-block; padding: 6px 14px; border-radius: var(--radius-md); background: var(--color-action-primary); color: var(--color-action-on-primary); font-weight: 600; }
+.gx-btn.sec { background: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-control); }
+.gx-tbl { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); background: var(--color-bg-surface); }
+.gx-tbl th, .gx-tbl td { border-bottom: 1px solid var(--color-border-subtle); padding: 6px 8px; text-align: left; }
+.gx-in { border: 1px solid var(--color-border-control); border-radius: var(--radius-md); padding: 6px 10px; background: var(--color-bg-surface); min-width: 160px; display: inline-block; }
+.gx-in.err { border-color: var(--color-status-danger-fg); }
+.mk { display: grid; gap: var(--space-3); }
+.mk .item { border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); padding: var(--space-3); }
+.mk .top { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; margin-bottom: var(--space-2); }
+.hidden { display: none !important; }
+@media (max-width: 860px) {
+  header { position: static; }
+  .wrap { grid-template-columns: 1fr; padding: var(--space-3) var(--space-4); }
+  nav ol { position: static; display: flex; overflow-x: auto; gap: var(--space-1); max-height: none; }
+  nav li { flex: 0 0 auto; }
+  nav button { white-space: nowrap; }
+  .bar { width: 90px; }
+  dl.terms { grid-template-columns: 1fr; }
+  .rows thead { display: none; }
+  .rows tr { display: grid; gap: var(--space-1); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border-subtle); }
+  .rows td { border: 0; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">요구 체크리스트</h1>
+  <div class="bar" role="progressbar" aria-label="전체 진행" aria-valuemin="0" aria-valuemax="100"><i id="bar"></i></div>
+  <span class="muted" id="progress"></span>
+  <span class="muted" id="autosave" aria-live="polite"></span>
+  <span class="grow"></span>
+  <div class="seg" role="group" aria-label="질문 범위" id="levels"></div>
+  <div class="seg" role="group" aria-label="보기">
+    <button type="button" id="fAll" aria-pressed="true">전체</button><button type="button" id="fTodo" aria-pressed="false">채울 것만</button>
+  </div>
+  <button type="button" class="btn" id="tabSum">요약 보기</button>
+  <button type="button" class="btn" id="tabTerms">용어 풀이</button>
+  <button type="button" class="btn" id="tabNova" title="'Nova 기본'이 실제로 어떤 모습인지 보기">Nova 보기</button>
+  <button type="button" class="btn" id="load">불러오기</button>
+  <button type="button" class="btn" id="draft">임시저장</button>
+  <button type="button" class="btn primary" id="submit">완료하고 제출</button>
+  <input type="file" id="file" accept=".json,application/json" class="hidden">
+</header>
+<div class="wrap">
+  <nav aria-label="섹션"><ol id="nav"></ol></nav>
+  <main id="main"></main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+const DATA = /*__DATA__*/null;
+const TREE = DATA.tree, PREFILL = (DATA.prefill && DATA.prefill.answers) || {}, EVID = DATA.evidence || {};
+const UNKNOWN = "_unknown";
+const KEY = "nova-checklist:v" + TREE.version;
+const LEVELS = TREE.levels || [{ lv: 1, label: "기본" }, { lv: 2, label: "자세히" }];
+const Q = {}, PARENT = {};
+(function index(qs, parent) {
+  for (const q of qs) {
+    Q[q.id] = q; if (parent) PARENT[q.id] = parent;
+    for (const o of q.options || []) if (o.children) index(o.children, [q.id, o.id]);
+  }
+})(TREE.sections.flatMap(s => s.questions), null);
+
+let st = { answers: {}, offSections: [], status: "draft", revision: 0, created: "", file: "", lv: 1, filter: "all", current: TREE.sections[0].id, view: "form", saved: "", build: DATA.build };
+function prefillInto(answers) {   // 자료에서 채운 답 — 이미 답한 질문은 건드리지 않는다
+  for (const [id, a] of Object.entries(PREFILL)) if (Q[id] && !answers[id]) answers[id] = { value: a.value, other: a.other || "", note: a.note || "", state: "prefill", evidence: a.evidence || [] };
+}
+prefillInto(st.answers);
+try {   // 이어가기 — 폼을 다시 만들어도(자동 채움이 바뀌어도) 이전 입력은 남긴다
+  const saved = JSON.parse(localStorage.getItem(KEY) || "null");
+  if (saved && saved.answers) { Object.assign(st, saved, { view: "form" }); if (saved.build !== DATA.build) { prefillInto(st.answers); st.build = DATA.build; } }
+} catch (e) {}
+const SERVER = location.protocol.startsWith("http");
+
+function stamp() { const d = new Date(); return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
+function persist() {
+  try { localStorage.setItem(KEY, JSON.stringify(st)); document.getElementById("autosave").textContent = `이 브라우저에 자동 저장 ${stamp()}`; }
+  catch (e) { document.getElementById("autosave").textContent = "자동 저장 불가 — 임시저장 버튼을 쓰세요"; }
+}
+function el(tag, attrs, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") n.className = v; else if (k.startsWith("on")) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) n.append(k.nodeType ? k : document.createTextNode(k));
+  return n;
+}
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.style.display = "block"; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = "none", 3200); }
+function sw(label, on, onclick, title) {
+  return el("button", { type: "button", class: "switch", role: "switch", "aria-checked": on ? "true" : "false", title: title || "", onclick }, el("span", { class: "track", "aria-hidden": "true" }), label);
+}
+function help(text) { return text ? el("details", { class: "help" }, el("summary", {}, "쉬운 설명"), el("p", {}, text)) : null; }
+
+function has(a) {
+  if (!a) return false;
+  if (Array.isArray(a.value)) return a.value.length > 0 && (typeof a.value[0] !== "object" || a.value.some(r => Object.values(r).some(v => v)));
+  if (a.value && typeof a.value === "object" && !("hex" in a.value)) return Object.values(a.value).some(x => x && x.level);   // 목업 채택표
+  return a.value !== "" && a.value != null;
+}
+function chosen(qid, oid) { const a = st.answers[qid]; if (!has(a)) return false; return Array.isArray(a.value) ? a.value.includes(oid) : a.value === oid; }
+function secOff(sid) { return st.offSections.includes(sid); }
+function parentOk(q) { let p = PARENT[q.id]; while (p) { if (!chosen(p[0], p[1])) return false; p = PARENT[p[0]]; } return true; }
+function visible(q) { return q.lv <= st.lv && parentOk(q); }
+function skipped(q) { const a = st.answers[q.id]; return !!(a && a.state === "unknown"); }
+function needs(q) { const a = st.answers[q.id]; return !has(a) || a.state === "prefill"; }
+function activeQs(sec) { const out = []; (function walk(qs) { for (const q of qs) if (visible(q)) { out.push(q); for (const o of q.options || []) if (o.children) walk(o.children); } })(sec.questions); return out; }
+function touch() { if (st.status === "complete") { st.status = "draft"; toast("내용이 바뀌어 '작성중'으로 돌아갔습니다 — 다 되면 다시 [완료하고 제출]"); } }
+function setAnswer(q, value, extra) {
+  touch();
+  const prev = st.answers[q.id] || {};
+  st.answers[q.id] = Object.assign({ other: "", note: "", evidence: [] }, prev, { value, state: value === UNKNOWN ? "unknown" : "customer" }, extra || {});
+  persist(); render();
+}
+
+// ── 색 계산: HEX ↔ HSL, 명도 대비(WCAG 2.x 상대 휘도)
+const HEXRE = /^#[0-9a-fA-F]{6}$/;
+function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function rgbToHex(r, g, b) { return "#" + [r, g, b].map(x => Math.round(Math.max(0, Math.min(255, x))).toString(16).padStart(2, "0")).join("").toUpperCase(); }
+function hexToHsl(h) {
+  let [r, g, b] = hexToRgb(h).map(x => x / 255); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); let hh = 0, s = 0; const l = (mx + mn) / 2;
+  if (mx !== mn) { const d = mx - mn; s = l > .5 ? d / (2 - mx - mn) : d / (mx + mn);
+    hh = mx === r ? (g - b) / d + (g < b ? 6 : 0) : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; hh *= 60; }
+  return [Math.round(hh), Math.round(s * 100), Math.round(l * 100)];
+}
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return rgbToHex(f(0) * 255, f(8) * 255, f(4) * 255);
+}
+function lum(h) { return hexToRgb(h).map(c => { c /= 255; return c <= .03928 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); }).reduce((s, c, i) => s + c * [.2126, .7152, .0722][i], 0); }
+function ratio(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); }
+function textTone(hex, bg = "#FFFFFF") {   // 글자용 진한 색 — 같은 색상 · 채도에서 밝기만 낮춰 4.5:1 을 맞춘다
+  if (ratio(hex, bg) >= 4.5) return hex;
+  const [h, s, l] = hexToHsl(hex);
+  for (let L = l; L >= 5; L--) { const c = hslToHex(h, s, L); if (ratio(c, bg) >= 4.5) return c; }
+  return "#000000";
+}
+function colorValue(hex, preset) { return { hex, preset: preset || "", text_hex: textTone(hex) }; }
+function chosenHex(qid, dflt) { const a = st.answers[qid]; return a && a.value && a.value.hex ? a.value.hex : dflt; }
+
+function colorNode(q, a) {
+  const cur = a && a.value && a.value.hex ? a.value : null;
+  const box = el("div");
+  box.append(el("div", { class: "swatches", role: "radiogroup", "aria-label": q.q }, q.presets.map(p =>
+    el("button", { type: "button", class: "sw", role: "radio", "aria-checked": cur && cur.preset === p.id ? "true" : "false", "aria-label": `${p.label} ${p.hex}`,
+      title: p.desc || "", onclick: () => setAnswer(q, colorValue(p.hex, p.id)) },
+      el("span", { class: "dot", style: `background:${p.hex}` }),
+      el("span", { class: "nm" }, p.label, p.rec ? el("span", { class: "badge rec" }, p.rec) : null), el("span", { class: "hx" }, p.hex)))));
+  const hex = cur ? cur.hex : q.presets[0].hex;
+  // 직접 지정 — 색 선택기 · HEX 입력
+  const picker = el("input", { type: "color", value: hex.toLowerCase(), "aria-label": q.q + " — 색 선택기" });
+  const txt = el("input", { type: "text", value: hex, "aria-label": q.q + " — HEX 색 코드", placeholder: "#2563EB", maxlength: 7 });
+  picker.addEventListener("change", () => setAnswer(q, colorValue(picker.value.toUpperCase(), "")));
+  const applyHex = () => { let v = txt.value.trim().toUpperCase(); if (v && !v.startsWith("#")) v = "#" + v;
+    if (HEXRE.test(v)) { if (v !== hex || (cur && cur.preset)) setAnswer(q, colorValue(v, "")); } else toast("색 코드는 #과 여섯 글자(0~9, A~F)로 적어 주세요 — 예: #2563EB"); };
+  txt.addEventListener("change", applyHex);
+  txt.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); applyHex(); } });
+  box.append(el("div", { class: "custom" }, el("strong", {}, "직접 지정"), picker, txt,
+    el("span", { class: "muted" }, cur && !cur.preset ? "직접 지정한 색입니다" : "회사 색 코드가 있으면 넣으세요")));
+  // 세밀 조정 — 색상 · 채도 · 밝기
+  const [h0, s0, l0] = hexToHsl(hex);
+  const dot = el("span", { class: "dot", style: `display:inline-block;width:28px;height:28px;border-radius:6px;background:${hex}` });
+  const vals = { h: h0, s: s0, l: l0 };
+  const outs = {};
+  const sl = (k, label, max) => {
+    const r = el("input", { type: "range", min: k === "l" ? 5 : 0, max, value: vals[k], "aria-label": `${q.q} — ${label}` });
+    outs[k] = el("span", {}, String(vals[k]));
+    r.addEventListener("input", () => { vals[k] = +r.value; outs[k].textContent = r.value; dot.style.background = hslToHex(vals.h, vals.s, vals.l); });
+    r.addEventListener("change", () => setAnswer(q, colorValue(hslToHex(vals.h, vals.s, vals.l), "")));
+    return [el("label", {}, label), r, outs[k]];
+  };
+  box.append(el("details", { class: "help" }, el("summary", {}, "세밀하게 조정(색상 · 채도 · 밝기)"),
+    el("div", { class: "sliders" }, sl("h", "색상", 360), sl("s", "채도", 100), sl("l", "밝기", 95)), el("div", { class: "row", style: "margin-top:6px" }, dot, el("span", { class: "muted" }, " 막대를 놓으면 적용됩니다"))));
+  // 미리보기 · 대비 검사
+  const t = textTone(hex), r1 = ratio("#FFFFFF", hex), r2 = ratio(hex, "#FFFFFF"), r3 = ratio(hex, "#141821");
+  const mark = r => r >= 4.5 ? el("span", { class: "ok" }, ` ${r.toFixed(1)}:1 통과`) : el("span", { class: "bad" }, ` ${r.toFixed(1)}:1 미달`);
+  box.append(el("div", { class: "cpv" },
+    el("div", { class: "tile", style: "background:#FFFFFF;color:#141821" }, el("span", { class: "sbtn", style: `background:${hex}` }, "버튼"), el("br"), "흰 글자 대비", mark(r1)),
+    el("div", { class: "tile", style: "background:#FFFFFF;color:#141821" }, el("strong", { style: `color:${hex}` }, "링크 · 강조 글자"), el("br"), "흰 배경 위 글자", mark(r2),
+      t !== hex ? el("div", {}, "→ 글자에는 ", el("strong", { style: `color:${t}` }, t), ` 을 씁니다(${ratio(t, "#FFFFFF").toFixed(1)}:1, 자동)`) : null),
+    el("div", { class: "tile", style: "background:#141821;color:#E6E9EF" }, el("strong", { style: `color:${hex}` }, "어두운 화면 글자"), el("br"), "어두운 배경 위", mark(r3))));
+  return box;
+}
+function previewNode(p) {
+  if (!p) return null;
+  const v = p.value;
+  if (p.kind === "radius") return el("span", { class: "pv" }, el("span", { class: "box", style: `border-radius:${v === "999px" ? "13px" : v}` }));
+  if (p.kind === "shadow") return el("span", { class: "pv" }, el("span", { class: "box", style: `border:1px solid var(--color-border-subtle);background:var(--color-bg-surface);box-shadow:${v}` }));
+  if (p.kind === "density") { const g = { comfortable: 7, normal: 4, compact: 2 }[v]; return el("span", { class: "pv" }, el("span", { class: "lines", style: `display:grid;gap:${g}px` }, el("i"), el("i"), el("i"))); }
+  if (p.kind === "font") return el("span", { class: "pv" }, el("span", { class: "sample", style: `font-family:${v};font-size:15px` }, "가나다 Abc 123"));
+  if (p.kind === "size") return el("span", { class: "pv" }, el("span", { class: "sample", style: `font-size:${v}` }, "가나다라"));
+  if (p.kind === "text") return el("span", { class: "pv" }, el("span", { class: "sample" }, `"${v}"`));
+  if (p.kind === "theme") return el("span", { class: "pv" }, el("span", { class: "box", style: v === "dark" ? "background:#141821;border-color:#586172" : "background:#FFFFFF;border-color:#E1E4EA" }));
+  const B = (l, tp, w, h) => el("b", { style: `left:${l}%;top:${tp}%;width:${w}%;height:${h}%` });
+  if (p.kind === "layout") {
+    const m = { side: [B(0, 0, 100, 18), B(0, 18, 24, 82)], top: [B(0, 0, 100, 18), B(0, 18, 100, 12)], bottom: [B(0, 0, 100, 18), B(0, 82, 100, 18)], none: [B(0, 0, 100, 18)] }[v];
+    return el("span", { class: "pv" }, el("span", { class: "wf" }, m));
+  }
+  if (p.kind === "list") {
+    const m = { table: [B(6, 12, 88, 14), B(6, 34, 88, 14), B(6, 56, 88, 14), B(6, 78, 88, 10)], card: [B(6, 12, 40, 76), B(54, 12, 40, 76)], split: [B(4, 12, 34, 14), B(4, 34, 34, 14), B(4, 56, 34, 14), B(44, 12, 52, 76)] }[v];
+    return el("span", { class: "pv" }, el("span", { class: "wf" }, m));
+  }
+  // 분위기 견본 — 브랜드 색만 데이터 HEX(색 견본과 같은 방식), 모서리 · 간격 · 바탕은 토큰 단계
+  if (p.kind === "style") {
+    const r = `var(--radius-${p.radius === "pill" ? "xl" : p.radius})`, g = `var(--space-${p.gap})`;
+    return el("span", { class: "pv" }, el("span", { class: "mood" + (p.dark ? " dark" : ""), style: `border-radius:${r};gap:${g};padding:${g}` },
+      el("span", { class: "bar", style: `background:${p.hex}` }), el("i"), el("i"),
+      el("span", { class: "cta", style: `background:${p.hex};border-radius:var(--radius-${p.radius})` })));
+  }
+  if (p.kind === "swatch") return el("span", { class: "pv sws", "aria-hidden": "true" }, v.map(c => el("span", { class: "sq", style: `background:${c}` })));
+  if (p.kind === "pos") {
+    const m = { bc: [40, 78], tr: [62, 8], br: [62, 78], tc: [30, 8] }[v];
+    return el("span", { class: "pv" }, el("span", { class: "wf" }, el("b", { class: "ink", style: `left:${m[0]}%;top:${m[1]}%;width:34%;height:14%` })));
+  }
+  if (p.kind === "shape") {
+    if (v.startsWith("btn_")) return el("span", { class: "pv" }, el("span", { class: "shp " + v }, "저장"));
+    if (v.startsWith("in_")) return el("span", { class: "pv" }, el("span", { class: "shp " + v }, "입력"));
+    if (v.startsWith("tb_")) return el("span", { class: "pv" }, el("span", { class: "tb " + v }, el("i"), el("i"), el("i"), el("i")));
+    if (v.startsWith("cd_")) return el("span", { class: "pv" }, el("span", { class: "cd " + v }));
+    if (v === "ld_spinner") return el("span", { class: "pv" }, el("span", { class: "spin" }));
+    if (v === "ld_skeleton") return el("span", { class: "pv" }, el("span", { class: "wf" }, el("b", { class: "ghost", style: "left:8%;top:14%;width:50%;height:16%" }), el("b", { class: "ghost", style: "left:8%;top:42%;width:84%;height:14%" }), el("b", { class: "ghost", style: "left:8%;top:66%;width:70%;height:14%" })));
+    if (v === "ld_bar") return el("span", { class: "pv" }, el("span", { class: "wf" }, B(0, 0, 46, 6)));
+    const L = { form_stack: [B(8, 10, 84, 14), B(8, 34, 84, 14), B(8, 58, 84, 14)], form_two: [B(6, 14, 42, 16), B(52, 14, 42, 16), B(6, 46, 42, 16), B(52, 46, 42, 16)],
+      form_side: [B(6, 14, 22, 12), B(34, 12, 60, 16), B(6, 44, 22, 12), B(34, 42, 60, 16)],
+      w_narrow: [B(30, 10, 40, 80)], w_default: [B(18, 10, 64, 80)], w_wide: [B(6, 10, 88, 80)] }[v];
+    return L ? el("span", { class: "pv" }, el("span", { class: "wf" }, L)) : null;
+  }
+  return null;
+}
+function val(qid, dflt) { const a = st.answers[qid]; return a && has(a) && a.state !== "unknown" ? a.value : dflt; }
+function kitPreview() {   // 고른 표준 킷의 견본(style) — 낱개 질문에 답하지 않은 값의 기본이 된다
+  const q = Q["design.kit"], id = val("design.kit", "");
+  const o = q && id ? (q.options || []).find(x => x.id === id) : null;
+  return o && o.preview ? { id, ...o.preview } : null;
+}
+function designPreview() {   // 디자인 섹션에서 고른 값이 바로 반영되는 작은 화면 — 킷을 고르면 그 킷 값, 낱개 답이 있으면 낱개 답
+  const kit = kitPreview(), kpx = (kit && kit.px) || {};
+  const main = chosenHex("design.color.main", kit && kit.hex ? kit.hex : "#4F5BD5"), acc = chosenHex("design.color.accent", "#F5B83D");
+  const dark = val("design.theme", kit && kit.dark ? "dark" : "light") === "dark";
+  const C = dark ? { bg: "#141821", sf: "#1A1F29", tx: "#E6E9EF", mu: "#A3ABBA", ln: "#2D3443" } : { bg: "#F7F8FA", sf: "#FFFFFF", tx: "#141821", mu: "#586172", ln: "#E1E4EA" };
+  const rad = val("design.radius", "") ? { sharp: "2px", soft: "10px", round: "16px", pill: "999px" }[val("design.radius", "soft")]
+    : kpx.radius != null ? (kpx.radius >= 999 ? "999px" : `${kpx.radius}px`) : "10px";
+  const pad = val("design.density", "") ? { comfortable: 12, normal: 8, compact: 4 }[val("design.density", "normal")]
+    : kpx.gap != null ? Math.round(Math.min(16, Math.max(4, kpx.gap * 2 / 3))) : 8;
+  const fs = { s: "13px", m: "15px", l: "17px" }[val("design.font.size", "m")];
+  const ff = (Q["design.font.body"].options.find(o => o.id === val("design.font.body", "pretendard")) || {}).preview;
+  const sh = { flat: "none", subtle: "0 1px 3px rgba(0,0,0,.12)", lifted: "0 8px 24px rgba(0,0,0,.18)" }[val("design.shadow", "subtle")];
+  const layout = val("design.layout", "side"), list = val("design.list", "table");
+  const tone = { formal: "예약이 등록되었습니다.", friendly: "예약을 등록했어요!", brief: "예약 등록 완료" }[val("design.tone", "friendly")];
+  const name = val("basic.name", "우리 서비스");
+  const textC = dark ? main : textTone(main);
+  const menu = ["홈", "예약", "손님", "통계"].map((m, i) => el("span", { style: i === 1 ? `background:${main};color:#fff` : `color:${C.mu}` }, m));
+  const btn = el("span", { style: `background:${main};color:#fff;padding:${pad}px ${pad + 8}px;border-radius:${rad === "999px" ? "999px" : rad};font-weight:600` }, "예약 등록");
+  const badge = el("span", { style: `background:${acc};color:#141821;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:600` }, "새 예약 3");
+  const items = [["김○○ · 2명", "14:00", "확정"], ["이○○ · 4명", "15:30", "대기"], ["박○○ · 1명", "18:00", "확정"]];
+  let body;
+  if (list === "card") body = el("div", { class: "row" }, items.slice(0, 2).map(r => el("div", { class: "card", style: `background:${C.sf};border:1px solid ${C.ln};border-radius:${rad === "999px" ? "16px" : rad};box-shadow:${sh};flex:1;min-width:120px` }, el("strong", {}, r[0]), el("div", { style: `color:${C.mu}` }, r[1] + " · " + r[2]))));
+  else body = el("div", { class: "tbl", style: `background:${C.sf};border:1px solid ${C.ln};border-radius:${rad === "999px" ? "16px" : rad};box-shadow:${sh};overflow:hidden` },
+    items.map((r, i) => el("div", { style: `padding:${pad}px 10px;border-top:${i ? "1px solid " + C.ln : "0"}` }, el("span", {}, r[0]), el("span", { style: `color:${C.mu}` }, r[1]), el("span", { style: `color:${textC};font-weight:600` }, r[2]))));
+  if (list === "split") body = el("div", { style: "display:grid;grid-template-columns:1fr 1fr;gap:8px" }, body, el("div", { class: "card", style: `background:${C.sf};border:1px solid ${C.ln};border-radius:${rad === "999px" ? "16px" : rad}` }, el("strong", {}, "김○○ · 2명"), el("div", { style: `color:${C.mu}` }, "14:00 창가 자리")));
+  const content = el("div", { class: "ct" }, el("div", { class: "row" }, el("strong", { style: "font-size:1.15em" }, "오늘 예약"), badge, el("span", { class: "grow" }), btn), body,
+    el("div", { style: `background:${dark ? "#E6E9EF" : "#262C38"};color:${dark ? "#141821" : "#fff"};padding:6px 10px;border-radius:8px;width:fit-content;font-size:13px` }, tone));
+  const head = el("div", { class: "hd", style: `background:${C.sf};border-bottom:1px solid ${C.ln}` }, el("span", { style: `width:18px;height:18px;border-radius:5px;background:${main}` }), name);
+  const nav = el("div", { class: "nv", style: layout === "side" ? `flex-direction:column;background:${C.sf};border-right:1px solid ${C.ln}` : `background:${C.sf};border-${layout === "bottom" ? "top" : "bottom"}:1px solid ${C.ln};justify-content:${layout === "bottom" ? "space-around" : "flex-start"}` }, menu);
+  const frame = el("div", { class: "frame", style: `background:${C.bg};color:${C.tx};font-family:${ff ? ff.value : "inherit"};font-size:${fs}` });
+  if (layout === "side") { frame.style.gridTemplateColumns = "96px 1fr"; frame.style.gridTemplateRows = "auto 1fr"; head.style.gridColumn = "1 / 3"; frame.append(head, nav, content); }
+  else if (layout === "top") frame.append(head, nav, content);
+  else if (layout === "bottom") { frame.style.gridTemplateRows = "auto 1fr auto"; frame.append(head, content, nav); }
+  else frame.append(head, content);
+  const kitName = kit ? ((Q["design.kit"].options || []).find(o => o.id === kit.id) || {}).label : "";
+  return el("div", { class: "dpv", "aria-label": "디자인 미리보기", "data-kit": kit ? kit.id : "", "data-main": main, "data-radius": rad, "data-dark": String(dark) },
+    el("div", { class: "row", style: "margin-bottom:8px" }, el("strong", {}, "미리보기"),
+      kit ? el("span", { class: "badge feeds" }, "킷: " + kitName) : null,
+      el("span", { class: "muted" }, "아래에서 고르면 바로 바뀝니다 — 실제 화면은 이 값으로 만든 디자인 토큰을 씁니다")), frame);
+}
+
+// ── [Nova 보기] — 'Nova 기본'이 무엇인지 실제 모습으로 보여 준다(예시는 Nova 디자인 토큰 그대로, 캡처는 실제 샘플 앱)
+const ex = (...k) => el("div", { class: "ex" }, ...k);
+const GALLERY = [
+  { id: "intro", t: "Nova 기본이란?", d: "Nova 에 이미 만들어져 검사를 통과한 화면 부품 · 디자인 · 기술 · 규칙 묶음입니다. 'Nova 기본'을 고르면 새로 만들지 않고 그대로 씁니다.",
+    good: ["빠르다 — 화면 틀 · 목록 · 입력 · 로그인 · 권한이 이미 있다", "검증됐다 — 글자 대비 · 키보드 조작 · 어두운 화면 · 오류 안내를 자동 검사", "같은 모양 — 모든 화면이 같은 규칙이라 배우기 쉽다", "고치기 쉽다 — 색 · 글꼴은 한곳(디자인 토큰)만 바꾸면 전체가 바뀐다"],
+    bad: ["Nova 에 없는 부품은 새로 만들어야 한다('화면 부품' 섹션에서 요청)", "아주 독특한 모양은 토큰 · 부품을 늘려서 맞춘다"] },
+  { id: "palette", t: "디자인 — 색 · 글꼴 · 모서리", d: "Nova 기본 색은 중립 회색 + 인디고 메인 + 앰버 보조입니다. 모든 글자 색이 밝은/어두운 화면에서 대비 4.5:1 을 넘습니다.",
+    ex: () => ex(el("div", { class: "row", style: "display:flex;gap:6px;flex-wrap:wrap" }, ["--color-action-primary", "--color-accent-400", "--color-status-success-fg", "--color-status-warning-fg", "--color-status-danger-fg", "--color-neutral-700", "--color-neutral-200"].map(v =>
+      el("span", { style: `width:64px;height:40px;border-radius:8px;background:var(${v});border:1px solid var(--color-border-subtle)`, title: v }))),
+      el("p", {}, el("span", { class: "gx-btn" }, "주 버튼"), " ", el("span", { class: "gx-btn sec" }, "보조 버튼"), " 글꼴 Pretendard · 모서리 살짝 둥글게 · 밝은/어두운 화면")) },
+  { id: "shell", t: "화면 틀(AppShell)", d: "로고 · 메뉴 · 사용자 메뉴 · 밝기 전환이 있는 공통 틀입니다. 메뉴는 서버가 권한에 맞게 내려 주므로 볼 수 없는 메뉴는 아예 안 보입니다.",
+    ex: () => ex(el("div", { style: "display:grid;grid-template-columns:120px 1fr;border:1px solid var(--color-border-subtle);border-radius:8px;overflow:hidden;min-height:120px;background:var(--color-bg-surface)" },
+      el("div", { style: "border-right:1px solid var(--color-border-subtle);padding:8px;display:grid;gap:4px;align-content:start;font-size:13px" }, el("strong", {}, "제품 이름"), ...["홈", "예약", "손님", "통계"].map((m, i) => el("span", { style: i === 1 ? "background:var(--color-brand-100);color:var(--color-text-brand);padding:3px 6px;border-radius:6px" : "padding:3px 6px" }, m))),
+      el("div", { style: "padding:10px" }, el("div", { style: "display:flex;justify-content:space-between;font-size:13px;color:var(--color-text-muted)" }, el("span", {}, "홈 › 예약"), el("span", {}, "김점장 ▾ · ☀")), el("h3", { style: "margin:8px 0" }, "예약")))) },
+  { id: "list", t: "목록 화면(ListPage + 표)", d: "검색 · 정렬 · 페이지 나누기 · 여러 건 선택 후 일괄 처리 · 빈 목록 안내가 들어 있습니다. 주소에 검색 조건이 남아 뒤로 가기 · 공유가 됩니다.", shot: "list",
+    ex: () => ex(el("div", { style: "display:flex;gap:8px;margin-bottom:8px" }, el("span", { class: "gx-in" }, "🔍 손님 이름"), el("span", { class: "gx-btn" }, "＋ 새 예약")),
+      el("table", { class: "gx-tbl" }, el("tr", {}, ...["☐", "손님", "시간", "상태"].map(h => el("th", {}, h))), ...[["김○○", "14:00", "확정"], ["이○○", "15:30", "대기"]].map(r => el("tr", {}, el("td", {}, "☐"), ...r.map(c => el("td", {}, c))))),
+      el("div", { class: "muted", style: "margin-top:6px" }, "1–2 / 2건 · ‹ 1 ›")) },
+  { id: "form", t: "입력 화면(FormPage)", d: "칸마다 검사하고, 틀린 칸 옆에 무엇을 고치면 되는지 알려 줍니다. 저장하는 동안 버튼이 잠겨 두 번 저장되지 않습니다.", shot: "form",
+    ex: () => ex(el("div", { style: "display:grid;gap:6px;max-width:320px" }, el("label", {}, "손님 이름 *"), el("span", { class: "gx-in err" }, ""), el("span", { style: "color:var(--color-status-danger-fg);font-size:13px" }, "이름을 입력해 주세요"), el("span", { class: "gx-btn", style: "width:fit-content" }, "저장"))) },
+  { id: "detail", t: "상세 화면(DetailPage)", d: "항목 하나를 보고 수정 · 보관합니다. 보관은 되돌리기 알림이 함께 나옵니다.", shot: "detail",
+    ex: () => ex(el("dl", { style: "display:grid;grid-template-columns:90px 1fr;gap:4px;margin:0" }, ...[["손님", "김○○"], ["시간", "11/12 14:00"], ["인원", "2명"]].flatMap(([k, v]) => [el("dt", { class: "muted" }, k), el("dd", { style: "margin:0" }, v)]))) },
+  { id: "login", t: "로그인 화면(LoginPage)", d: "아이디 · 비밀번호 로그인과 오류 안내가 있습니다. 개발 중에는 개발용 계정으로 바로 들어갑니다.",
+    ex: () => ex(el("div", { style: "display:grid;gap:6px;max-width:260px" }, el("strong", {}, "로그인"), el("span", { class: "gx-in" }, "user@회사.kr"), el("span", { class: "gx-in" }, "••••••••"), el("span", { class: "gx-btn", style: "text-align:center" }, "로그인"))) },
+  { id: "confirm", t: "확인 창(ConfirmDialog)", d: "지우기처럼 되돌릴 수 없는 일 전에 무엇이 사라지는지 보여 주고 한 번 더 묻습니다.", shot: "confirm",
+    ex: () => ex(el("div", { style: "border:1px solid var(--color-border-subtle);border-radius:10px;padding:12px;max-width:320px;background:var(--color-bg-surface);box-shadow:0 8px 24px rgba(0,0,0,.15)" }, el("strong", {}, "예약 3건을 지울까요?"), el("p", { class: "muted" }, "지우면 되돌릴 수 없습니다."), el("span", { class: "gx-btn sec" }, "취소"), " ", el("span", { class: "gx-btn", style: "background:var(--color-action-danger)" }, "지우기"))) },
+  { id: "toast", t: "되돌리기 알림", d: "보관 · 상태 변경 뒤 몇 초 동안 '실행 취소'를 보여 줍니다. 실수해도 바로 되돌릴 수 있습니다.", shot: "toast",
+    ex: () => ex(el("span", { style: "background:var(--color-bg-inverse);color:var(--color-text-inverse);padding:8px 12px;border-radius:8px;display:inline-flex;gap:12px" }, "예약 1건을 보관했습니다", el("u", {}, "실행 취소"))) },
+  { id: "badge", t: "상태 배지(StatusBadge)", d: "상태를 색과 글자로 함께 보여 줍니다(색만으로 구분하지 않음 — 색약 사용자 배려).",
+    ex: () => ex(...[["확정", "success"], ["대기", "warning"], ["취소", "danger"], ["보관", "neutral"]].map(([l, k]) => el("span", { class: "badge", style: `background:var(--color-status-${k}-bg);color:var(--color-status-${k}-fg);margin-right:6px;font-size:13px` }, l))) },
+  { id: "stat", t: "숫자 카드 · 작은 그래프", d: "대시보드에 쓰는 요약 숫자(Stat)와 작은 추이 그래프(Sparkline · Bars)입니다.",
+    ex: () => ex(el("div", { style: "display:flex;gap:8px" }, ...[["오늘 예약", "12"], ["대기", "3"], ["노쇼", "0"]].map(([k, v]) => el("div", { style: "border:1px solid var(--color-border-subtle);border-radius:8px;padding:8px 12px;background:var(--color-bg-surface)" }, el("div", { class: "muted" }, k), el("strong", { style: "font-size:22px" }, v))))) },
+  { id: "empty", t: "빈 화면 · 오류 · 권한 없음", d: "비어 있으면 무엇을 하면 되는지, 오류면 무엇이 잘못됐고 다시 시도하는 버튼을, 권한이 없으면 누구에게 요청하는지 알려 줍니다.",
+    ex: () => ex(el("div", { style: "text-align:center;padding:12px" }, el("div", { style: "font-size:28px" }, "📭"), el("strong", {}, "아직 예약이 없습니다"), el("p", { class: "muted" }, "첫 예약을 등록해 보세요"), el("span", { class: "gx-btn" }, "＋ 새 예약"))) },
+  { id: "controls", t: "구분 버튼 · 스위치 · 선택 칸", d: "Segmented(여러 보기 중 하나) · Switch(켜기/끄기) · Select(목록에서 고르기).",
+    ex: () => ex(el("span", { class: "seg" }, el("button", { type: "button", "aria-pressed": "true" }, "오늘"), el("button", { type: "button" }, "이번 주")), " ", sw("알림 받기", true, () => {}), " ", el("span", { class: "gx-in" }, "매장 선택 ▾")) },
+  { id: "shortcut", t: "단축키 도움말", d: "? 키를 누르면 단축키 목록이 나옵니다(키보드로 빠르게 일하는 사용자용).",
+    ex: () => ex(el("table", { class: "gx-tbl" }, ...[["/", "검색"], ["n", "새로 만들기"], ["?", "도움말"]].map(([k, v]) => el("tr", {}, el("td", {}, el("code", {}, k)), el("td", {}, v))))) },
+  { id: "stack", t: "Nova 기본 기술", d: "Nova 가 미리 준비해 둔 기술 묶음입니다. 이것을 쓰면 공통 부품 · 서버 라이브러리 · 배포 설정을 그대로 씁니다.",
+    ex: () => ex(el("table", { class: "gx-tbl" }, el("tr", {}, el("th", {}, "층"), el("th", {}, "기술"), el("th", {}, "Nova 가 해 주는 것")),
+      ...[["화면(웹)", "Next.js + React + TypeScript", "공통 화면 부품 · 디자인 토큰 · 화면 시험"], ["서버", "Python + FastAPI", "서비스 틀 · 권한 검사 · 이벤트 · 측정"], ["앱", "Kotlin Multiplatform", "안드로이드 · 아이폰 · 데스크톱 한 코드, 앱 부품"],
+        ["DB", "MariaDB(서비스마다 자기 DB)", "UUIDv7 번호 · 표 의미 사전 자동"], ["배포", "쿠버네티스(k3s)", "설정 파일 자동 생성 · 감시 · 알림"]].map(r => el("tr", {}, ...r.map(c => el("td", {}, c)))))), shot: "mobile" },
+];
+function openGallery(id) { st.view = "nova"; st.focus = id; render(); }
+function novaGallery() {
+  const box = el("div");
+  box.append(el("section", { class: "card" }, el("h2", {}, "Nova 보기 — 'Nova 기본'은 이런 모습입니다"),
+    el("p", { class: "muted" }, "아래 예시는 Nova 디자인 토큰으로 그린 것이고, '실제 화면'은 Nova 샘플 앱을 찍은 것입니다. 보고 그대로 쓸지, 목업 · 다른 디자인으로 바꿀지 판단하세요."),
+    el("div", { class: "chips" }, GALLERY.map(g => el("button", { type: "button", class: "btn sm", onclick: () => document.getElementById("g-" + g.id).scrollIntoView({ block: "start" }) }, g.t)))));
+  for (const g of GALLERY) {
+    const shot = g.shot && (DATA.shots || {})[g.shot];
+    box.append(el("section", { class: "card gcard", id: "g-" + g.id, "aria-labelledby": "gh-" + g.id }, el("h2", { id: "gh-" + g.id }, g.t), el("p", {}, g.d),
+      g.good ? el("div", {}, el("strong", {}, "좋은 점"), el("ul", {}, g.good.map(x => el("li", {}, x)))) : null,
+      g.bad ? el("div", {}, el("strong", {}, "알아 둘 점"), el("ul", {}, g.bad.map(x => el("li", {}, x)))) : null,
+      g.ex ? g.ex() : null,
+      shot ? el("details", { class: "help", open: true }, el("summary", {}, "실제 화면(Nova 샘플 앱)"), el("img", { src: shot, alt: g.t + " — 실제 화면", loading: "lazy" })) : null));
+  }
+  return box;
+}
+
+// ── 목업 채택표 — 입고된 목업 · 캡처마다 채택 수준을 고른다
+let LIVE_MOCKUPS = null;
+function mockupsNode(q, a) {
+  const levels = TREE.mockup_levels || [];
+  const known = new Map((DATA.mockups || []).map(m => [m.file, m]));
+  for (const m of LIVE_MOCKUPS || []) if (!known.has(m.file)) known.set(m.file, m);
+  const cur = a && a.value && typeof a.value === "object" && !Array.isArray(a.value) ? a.value : {};
+  const list = el("div", { class: "mk" });
+  if (!known.size) list.append(el("p", { class: "muted" }, "아직 받은 목업이 없습니다. inbound/html-mockup(화면 파일) · inbound/screenshot(캡처)에 넣고 폼을 다시 만들면(checklist.py mockups → build) 여기 나옵니다. 저장 서버로 열었다면 넣자마자 보입니다."));
+  for (const [file, m] of known) {
+    const v = cur[file] || {};
+    const href = SERVER ? "files/" + file.split("/").map(encodeURIComponent).join("/") : "../" + file;
+    const save = patch => { const next = { ...cur, [file]: { level: v.level || "", note: v.note || "", ...patch } }; setAnswer(q, next); };
+    const note = el("input", { type: "text", "aria-label": `${file} — 메모`, placeholder: "메모 — 예: 예약 화면만, 색은 바꿔서", value: v.note || "" });
+    note.addEventListener("change", () => save({ note: note.value.trim() }));
+    list.append(el("div", { class: "item" },
+      el("div", { class: "top" }, el("span", { class: "badge feeds" }, m.kind || "목업"), el("strong", {}, file), el("a", { href, target: "_blank", rel: "noopener" }, "열어 보기 ↗")),
+      m.summary ? el("p", { class: "muted", style: "margin:0 0 6px" }, m.summary) : null,
+      el("div", { class: "chips", role: "radiogroup", "aria-label": `${file} — 채택 수준` }, levels.map(l => {
+        const inp = el("input", { type: "radio", name: "mk:" + file, value: l.id }); inp.checked = v.level === l.id;
+        inp.addEventListener("change", () => save({ level: l.id }));
+        return el("label", { class: "chip", title: l.desc || "" }, inp, el("span", { class: "lab" }, l.label));
+      })), el("div", { style: "margin-top:6px" }, note)));
+  }
+  if (SERVER && LIVE_MOCKUPS === null) fetch("api/mockups").then(r => r.json()).then(j => { LIVE_MOCKUPS = j; if (j.some(m => !known.has(m.file))) render(); }).catch(() => { LIVE_MOCKUPS = []; });
+  return list;
+}
+
+function optionNode(q, o, multi, a) {
+  const inp = el("input", { type: multi ? "checkbox" : "radio", name: q.id, value: o.id });
+  inp.checked = chosen(q.id, o.id);
+  inp.addEventListener("change", () => {
+    let v;
+    if (multi) { const cur = a && Array.isArray(a.value) ? a.value.filter(x => x !== UNKNOWN) : []; v = inp.checked ? [...cur, o.id] : cur.filter(x => x !== o.id); }
+    else v = o.id;
+    setAnswer(q, v);
+  });
+  return el("label", { class: "chip", title: o.hint || "" }, inp,
+    el("span", { class: "lab" }, o.label, o.rec ? el("span", { class: "badge rec", title: (TREE.badges || {})[o.rec] || "" }, o.rec) : null,
+      o.gallery || o.rec === "Nova 기본" ? el("button", { type: "button", class: "gl", "aria-label": `${o.label} — Nova 에서 실제 모습 보기`,
+        onclick: e => { e.preventDefault(); e.stopPropagation(); openGallery(o.gallery || "intro"); } }, "보기 ↗") : null,
+      o.children ? el("span", { class: "more", "aria-hidden": "true" }, "▸ 세부 질문") : null),
+    o.desc ? el("span", { class: "desc" }, o.desc) : null, o.warn ? el("span", { class: "warn" }, "⚠ " + o.warn) : null, previewNode(o.preview));
+}
+function rowsNode(q, a) {
+  const rows = a && Array.isArray(a.value) ? a.value : [];
+  const save = list => setAnswer(q, list.filter(r => Object.values(r).some(v => v)));
+  const body = rows.concat([{}]).map((r, i) => el("tr", {}, q.columns.map(c => {
+    let inp;
+    if (c.type === "one") {
+      inp = el("select", { "aria-label": `${c.label} ${i + 1}` }, el("option", { value: "" }, "—"), c.options.map(o => el("option", { value: o.id }, o.label)));
+      inp.value = r[c.id] || "";
+    } else { inp = el("input", { type: "text", "aria-label": `${c.label} ${i + 1}`, placeholder: c.ph || "" }); inp.value = r[c.id] || ""; }
+    inp.addEventListener("change", () => { const list = rows.map(x => ({ ...x })); while (list.length <= i) list.push({}); list[i][c.id] = inp.value.trim(); save(list); });
+    return el("td", {}, inp);
+  }), el("td", {}, i < rows.length ? el("button", { type: "button", class: "btn sm", "aria-label": `${i + 1}번 줄 지우기`, onclick: () => save(rows.filter((_, k) => k !== i)) }, "지우기") : null)));
+  return el("table", { class: "rows" }, el("thead", {}, el("tr", {}, q.columns.map(c => el("th", {}, c.label)), el("th", {}, ""))), el("tbody", {}, body));
+}
+function questionNode(q, first) {
+  const a = st.answers[q.id], sk = skipped(q);
+  const title = el("p", { class: "qt", id: "q-" + q.id }, q.q,
+    q.std ? el("span", { class: "badge std", title: "Nova 표준 판정에 쓰입니다" }, q.std) : null,
+    q.feeds && q.feeds.startsWith("foundation") ? el("span", { class: "badge feeds", title: "기반 설계(/foundation)의 입력이 됩니다" }, "기술 결정") : null,
+    sk ? el("span", { class: "badge skip" }, "건너뜀") : null,
+    !sk && a && a.state === "prefill" ? el("span", { class: "badge prefill" }, "자료에서 채움 · 확인 필요") : null,
+    !sk && a && a.state === "confirmed" ? el("span", { class: "badge ok" }, "확인함") : null,
+    !sk && !has(a) ? el("span", { class: "badge todo" }, "아직") : null);
+  const toggle = sw("건너뛰기", sk, () => setAnswer(q, sk ? (q.type === "many" || q.type === "rows" ? [] : "") : UNKNOWN), "답하기 어려우면 켜세요 — 나중에 인터뷰로 묻습니다");
+  if (q.type === "color" && a && a.value && a.value.hex) title.append(el("span", { class: "badge ok", style: `box-shadow:inset 12px 0 0 ${a.value.hex};padding-left:16px` }, a.value.hex));
+  const box = el("div", { class: "q" + (first ? " first" : "") + (sk ? " skipped" : ""), role: "group", "aria-labelledby": "q-" + q.id }, el("div", { class: "qhead" }, title, toggle));
+  const body = el("div", { class: "body" }, help(q.help));
+  if (q.type === "text") {
+    const ta = el("textarea", { "aria-labelledby": "q-" + q.id, placeholder: q.ph || "여기에 적어 주세요" });
+    ta.value = a && a.value !== UNKNOWN ? a.value || "" : "";
+    ta.addEventListener("change", () => setAnswer(q, ta.value.trim()));
+    body.append(ta);
+  } else if (q.type === "rows") {
+    body.append(rowsNode(q, a));
+  } else if (q.type === "color") {
+    body.append(colorNode(q, a));
+  } else if (q.type === "mockups") {
+    body.append(mockupsNode(q, a));
+  } else {
+    const multi = q.type === "many";
+    const cards = q.options.some(o => o.desc || o.warn || o.preview);
+    const chips = opts => el("div", { class: "chips" + (cards ? " cards" : "") }, opts.map(o => optionNode(q, o, multi, a)));
+    if (q.options.some(o => o.group)) {   // 분류(group)가 있으면 분류별로 묶어 보인다 — 순서는 트리 순서
+      const groups = [...new Set(q.options.map(o => o.group || ""))];
+      body.append(...groups.map(g => el("div", { class: "grp", role: "group", "aria-label": g || "기타" }, g ? el("p", { class: "gh" }, g) : null,
+        chips(q.options.filter(o => (o.group || "") === g)))));
+    } else body.append(chips(q.options));
+    const other = q.options.find(o => o.other);
+    if (other && chosen(q.id, other.id)) {
+      const t = el("input", { type: "text", class: "other", "aria-label": q.q + " — 기타 내용", placeholder: "기타 — 직접 적어 주세요" });
+      t.value = (a && a.other) || "";
+      t.addEventListener("change", () => { touch(); st.answers[q.id].other = t.value.trim(); persist(); });
+      body.append(t);
+    }
+    const hint = q.options.filter(o => o.hint && chosen(q.id, o.id)).map(o => o.hint);
+    if (hint.length) body.append(el("div", { class: "hint" }, "💡 " + hint.join(" · ")));
+  }
+  if (a && a.state === "prefill") {
+    const ev = (a.evidence || []).map(id => EVID[id] ? el("li", {}, `${id} ${EVID[id].text} (${EVID[id].file})`) : el("li", {}, id));
+    body.append(el("div", { class: "evid" }, el("span", {}, "근거"), el("ul", {}, ev.length ? ev : [el("li", {}, PREFILL[q.id] && PREFILL[q.id].why || "받은 자료에서 추정")]),
+      el("button", { type: "button", class: "btn", onclick: () => { touch(); st.answers[q.id].state = "confirmed"; persist(); render(); } }, "맞아요")));
+  }
+  for (const o of q.options || []) {
+    if (!o.children || !chosen(q.id, o.id)) continue;
+    const kids = o.children.filter(visible).map(k => questionNode(k, false));
+    if (kids.length) body.append(el("div", { class: "kids", "aria-label": o.label + " — 세부 질문" }, kids));
+  }
+  box.append(body);
+  return box;
+}
+
+function counts(sec) {
+  if (secOff(sec.id)) return { total: 0, done: 0, off: true };
+  const qs = activeQs(sec); return { total: qs.length, done: qs.filter(q => !needs(q)).length };
+}
+// ── 다시 그리기 전후로 포커스 · 열린 설명 칸(details)을 지킨다 — 답할 때마다 화면을 새로 그려도 키보드 위치와 펼친 칸을 잃지 않게
+function focusKey(n) {
+  if (!n || n === document.body || !n.tagName) return "";
+  if (n.name && (n.type === "radio" || n.type === "checkbox")) return `in|${n.name}|${n.value}`;
+  if (n.getAttribute("aria-label")) return `al|${n.getAttribute("aria-label")}`;
+  if (n.getAttribute("aria-labelledby")) return `alb|${n.tagName}|${n.getAttribute("aria-labelledby")}`;
+  if (n.id) return `id|${n.id}`;
+  if (n.tagName === "SUMMARY" && n.parentElement) return `sm|${detailsKey(n.parentElement)}`;
+  const box = n.parentElement && n.parentElement.closest("[id],[aria-labelledby]");
+  const txt = (n.firstChild && n.firstChild.nodeType === 3 ? n.firstChild.textContent : n.textContent || "").trim();
+  return txt ? `tx|${n.tagName}|${box ? box.id || box.getAttribute("aria-labelledby") : ""}|${txt}` : "";
+}
+function detailsKey(d) {
+  const box = d.parentElement && d.parentElement.closest("[aria-labelledby],[id]");
+  const sum = d.querySelector(":scope > summary");
+  return `${box ? box.getAttribute("aria-labelledby") || box.id : ""}|${sum ? sum.textContent.trim() : ""}`;
+}
+const FOCUSABLE = "input,textarea,select,button,summary,a[href],[tabindex]";
+function render() {
+  const fk = focusKey(document.activeElement);
+  const opened = {};
+  for (const d of document.querySelectorAll("details")) opened[detailsKey(d)] = d.open;
+  renderNow();
+  for (const d of document.querySelectorAll("details")) { const k = detailsKey(d); if (k in opened) d.open = opened[k]; }
+  if (fk && (!document.activeElement || document.activeElement === document.body)) {   // 포커스 있던 요소가 새로 그려져 사라졌을 때만
+    const n = [...document.querySelectorAll(FOCUSABLE)].find(x => focusKey(x) === fk);
+    if (n) { const dd = n.closest("details"); if (dd && !dd.open && n.tagName !== "SUMMARY") dd.open = true; n.focus({ preventScroll: true }); }
+  }
+}
+function renderNow() {
+  const name = st.answers["basic.name"] && st.answers["basic.name"].value;
+  document.getElementById("title").textContent = (name && name !== UNKNOWN ? name + " · " : "") + TREE.title;
+  const lvBox = document.getElementById("levels"); lvBox.replaceChildren();
+  for (const l of LEVELS) lvBox.append(el("button", { type: "button", "aria-pressed": st.lv === l.lv ? "true" : "false", title: l.desc || "", onclick: () => { st.lv = l.lv; persist(); render(); } }, l.label));
+  let T = 0, D = 0;
+  const nav = document.getElementById("nav"); nav.replaceChildren();
+  for (const s of TREE.sections) {
+    const c = counts(s); T += c.total; D += c.done;
+    if (!c.off && c.total === 0) continue;   // 이 범위에 질문이 없는 섹션은 목차에서 감춘다
+    const b = el("button", { type: "button", "aria-current": st.view === "form" && st.current === s.id ? "true" : "false",
+      onclick: () => { st.current = s.id; st.view = "form"; st.filter = "all"; persist(); render(); window.scrollTo(0, 0); } },
+      s.title, el("span", { class: "cnt" }, c.off ? "건너뜀" : `${c.done}/${c.total}`));
+    nav.append(el("li", { class: c.off ? "off" : c.done === c.total ? "done" : "" }, b));
+  }
+  if (!activeQs(TREE.sections.find(s => s.id === st.current) || TREE.sections[0]).length && !secOff(st.current)) st.current = TREE.sections.find(s => activeQs(s).length).id;
+  const pct = T ? Math.round(D * 100 / T) : 0;
+  document.getElementById("bar").style.width = pct + "%";
+  document.querySelector("[role=progressbar]").setAttribute("aria-valuenow", pct);
+  document.getElementById("progress").textContent = `${D}/${T} 채움`;
+  for (const [id, on] of [["fAll", st.filter === "all"], ["fTodo", st.filter === "todo"]]) document.getElementById(id).setAttribute("aria-pressed", on);
+  document.getElementById("tabSum").textContent = st.view === "sum" ? "질문으로 돌아가기" : "요약 보기";
+  document.getElementById("tabTerms").textContent = st.view === "terms" ? "질문으로 돌아가기" : "용어 풀이";
+  document.getElementById("tabNova").textContent = st.view === "nova" ? "질문으로 돌아가기" : "Nova 보기";
+  const main = document.getElementById("main"); main.replaceChildren(statusBox(D, T));
+  if (st.view === "sum") { main.append(summary()); return; }
+  if (st.view === "terms") { main.append(terms()); return; }
+  if (st.view === "nova") { main.append(novaGallery()); if (st.focus) { const c = document.getElementById("g-" + st.focus); if (c) setTimeout(() => c.scrollIntoView({ block: "start" }), 0); st.focus = ""; } return; }
+  const secs = st.filter === "todo" ? TREE.sections.filter(s => !secOff(s.id)) : TREE.sections.filter(s => s.id === st.current);
+  for (const s of secs) {
+    let qs = s.questions.filter(visible);
+    if (st.filter === "todo") qs = qs.filter(q => activeQs({ questions: [q] }).some(needs));
+    if (!qs.length && (st.filter === "todo" || !secOff(s.id))) continue;
+    const off = secOff(s.id);
+    const head = el("div", { class: "sechead" }, el("div", { class: "grow" }, el("h2", { id: "s-" + s.id }, s.title), el("p", { class: "muted", style: "margin:4px 0 0" }, s.hint || "")),
+      sw(off ? "이 섹션 건너뜀" : "이 섹션 답하기", !off, () => { touch(); st.offSections = off ? st.offSections.filter(x => x !== s.id) : [...st.offSections, s.id]; persist(); render(); },
+        "답하기 어려운 섹션은 끄고 넘어가세요 — 나중에 인터뷰로 묻습니다"));
+    main.append(el("section", { class: "card" + (off ? " off" : ""), "aria-labelledby": "s-" + s.id }, head, off ? el("p", { class: "muted" }, "이 섹션은 건너뛰었습니다. 스위치를 켜면 다시 답할 수 있습니다.") : help(s.help),
+      !off && s.preview && st.filter === "all" ? designPreview() : null,
+      qs.map((q, i) => questionNode(q, i === 0))));
+  }
+  if (!main.querySelector("section")) main.append(el("section", { class: "card" }, el("h2", {}, "모두 채웠습니다"), el("p", {}, "요약을 확인하고 [완료하고 제출]을 누르세요.")));
+  if (st.filter === "all") {
+    const order = TREE.sections.filter(s => secOff(s.id) || activeQs(s).length);
+    const nx = order[order.findIndex(s => s.id === st.current) + 1];
+    if (nx) main.append(el("button", { type: "button", class: "btn primary", onclick: () => { st.current = nx.id; persist(); render(); window.scrollTo(0, 0); } }, `다음: ${nx.title} →`));
+  }
+}
+function statusBox(D, T) {
+  const done = st.status === "complete";
+  return el("div", { class: "status " + st.status },
+    el("span", {}, done ? "✅ 제출됨(완료) — 이 내용으로 요구 분석에 반영됩니다." : "✏️ 작성중 — [임시저장] 후 언제든 이어서 쓸 수 있습니다. 다 되면 [완료하고 제출]."),
+    st.file ? el("span", { class: "muted" }, `파일 ${st.file} · 판 ${st.revision}${st.saved ? " · " + st.saved : ""}`) : null,
+    done ? el("button", { type: "button", class: "btn sm", onclick: () => { st.status = "draft"; persist(); render(); } }, "작성중으로 되돌리기") : null);
+}
+function label(q, a) {
+  if (!has(a)) return "—";
+  if (a.state === "unknown") return "건너뜀 · 나중에";
+  if (q.type === "text") return a.value;
+  if (q.type === "mockups") return Object.entries(a.value).filter(([, x]) => x.level).map(([f, x]) => `${f}: ${((TREE.mockup_levels || []).find(l => l.id === x.level) || {}).label || x.level}${x.note ? "(" + x.note + ")" : ""}`).join(" / ");
+  if (q.type === "color") { const p = q.presets.find(x => x.id === a.value.preset); return `${p ? p.label : "직접 지정"} ${a.value.hex}${a.value.text_hex && a.value.text_hex !== a.value.hex ? ` (글자용 ${a.value.text_hex})` : ""}`; }
+  if (q.type === "rows") return a.value.map(r => q.columns.map(c => c.type === "one" ? ((c.options.find(o => o.id === r[c.id]) || {}).label || "") : (r[c.id] || "")).filter(Boolean).join(" · ")).join(" / ");
+  const vals = Array.isArray(a.value) ? a.value : [a.value];
+  return vals.map(v => { const o = q.options.find(o => o.id === v); return o ? (o.other && a.other ? `${o.label}(${a.other})` : o.label) : v; }).join(", ");
+}
+function summary() {
+  const box = el("section", { class: "card sum" }, el("h2", {}, "요약"));
+  const todo = [];
+  for (const s of TREE.sections) {
+    if (secOff(s.id)) { box.append(el("h3", {}, s.title), el("p", { class: "muted" }, "건너뜀")); continue; }
+    if (!activeQs(s).length) continue;
+    const ul = el("ul");
+    (function walk(qs, ul) {
+      for (const q of qs) {
+        if (!visible(q)) continue;
+        const a = st.answers[q.id];
+        if (needs(q)) todo.push(`${s.title} — ${q.q}`);
+        const li = el("li", {}, `${q.q} → ${label(q, a)}`, a && a.state === "prefill" ? " (자료에서 채움 · 확인 전)" : "");
+        const sub = el("ul");
+        for (const o of q.options || []) if (o.children && chosen(q.id, o.id)) walk(o.children, sub);
+        if (sub.children.length) li.append(sub);
+        ul.append(li);
+      }
+    })(s.questions, ul);
+    box.append(el("h3", {}, s.title), ul);
+  }
+  box.prepend(el("p", {}, todo.length ? `채우거나 확인할 것 ${todo.length}개 — [채울 것만]으로 모아 볼 수 있습니다.` : "모든 질문에 답했습니다."));
+  return box;
+}
+function terms() {
+  const box = el("section", { class: "card" }, el("h2", {}, "용어 풀이"), el("p", { class: "muted" }, "질문에 나오는 어려운 말을 쉽게 풀었습니다."));
+  const q = el("input", { type: "text", "aria-label": "용어 찾기", placeholder: "찾을 말 — 예: 배포" });
+  const dl = el("dl", { class: "terms" });
+  const fill = () => { dl.replaceChildren(); for (const g of TREE.glossary || []) if (!q.value || (g.term + g.desc).includes(q.value)) dl.append(el("dt", {}, g.term), el("dd", {}, g.desc)); };
+  q.addEventListener("input", fill); fill();
+  const badges = Object.entries(TREE.badges || {}).map(([k, v]) => el("li", {}, el("span", { class: "badge rec" }, k), " ", v));
+  box.append(q, el("div", { style: "height:12px" }), dl, el("h3", {}, "표시 뜻"), el("ul", {}, badges,
+    el("li", {}, el("span", { class: "badge prefill" }, "자료에서 채움"), " 받은 자료에서 찾은 답 — 맞으면 [맞아요]"),
+    el("li", {}, el("span", { class: "badge feeds" }, "기술 결정"), " 기반 설계(/foundation)에 쓰입니다"),
+    el("li", {}, el("span", { class: "badge skip" }, "건너뜀"), " 스위치로 넘긴 질문 — 나중에 인터뷰로 묻습니다")));
+  return box;
+}
+
+function exportDoc(status) {
+  const answers = {};
+  // 단계(기본/자세히/전문가)를 낮춰도 답한 것은 남긴다 — 빠지는 것은 부모 보기를 풀었거나 섹션을 건너뛴 답뿐
+  for (const [id, a] of Object.entries(st.answers)) { const q = Q[id]; const sid = TREE.sections.find(s => id.startsWith(s.id + ".")).id;
+    if (!q || secOff(sid) || !parentOk(q) || !has(a)) continue;
+    answers[id] = { value: a.value, other: a.other || "", note: a.note || "", state: a.state, evidence: a.evidence || [] }; }
+  const now = new Date();
+  const iso = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 19);
+  return { form: "nova-checklist", tree_version: TREE.version, status, revision: st.revision + 1,
+    created: st.created || iso.slice(0, 10), updated: iso, file: st.file, lv: st.lv, skipped_sections: st.offSections.slice(), answers };
+}
+async function save(status) {
+  const doc = exportDoc(status);
+  const after = name => { Object.assign(st, { file: name, revision: doc.revision, created: doc.created, status, saved: `${stamp()} 저장` }); persist(); render(); };
+  if (SERVER) {
+    try {
+      const r = await fetch("api/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(doc) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error && j.error.message || r.status);
+      after(j.file);
+      toast(status === "complete" ? `제출했습니다 — ${j.file}.json · .md` : `임시저장했습니다 — ${j.file}.json · .md (이어서 쓰면 같은 파일에 저장)`); return;
+    } catch (e) { toast("저장소 저장 실패 — 파일로 내려받습니다 (" + e.message + ")"); }
+  }
+  const name = doc.file || `checklist_${doc.created.replaceAll("-", "")}_01`;
+  doc.file = name;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" }));
+  el("a", { href: url, download: name + ".json" }).click(); URL.revokeObjectURL(url);
+  after(name);
+  toast(status === "complete" ? `${name}.json 을 내려받았습니다 — 보내 주시면 됩니다` : `임시저장: ${name}.json 을 내려받았습니다. 이 브라우저에서 다시 열면 이어지고, 다른 PC 에서는 [불러오기]로 이어 갑니다`);
+}
+function loadDoc(doc) {
+  if (!doc || doc.form !== "nova-checklist") { toast("체크리스트 파일이 아닙니다"); return; }
+  const answers = {};
+  for (const [id, a] of Object.entries(doc.answers || {})) if (Q[id]) answers[id] = a;
+  prefillInto(answers);
+  Object.assign(st, { answers, offSections: doc.skipped_sections || [], status: doc.status || "draft", revision: doc.revision || 0, created: doc.created || "", file: doc.file || "", lv: doc.lv || st.lv, saved: "" });
+  persist(); render(); toast(`불러왔습니다 — ${doc.file || "파일"} (판 ${doc.revision || 0}) · 이어서 쓰세요`);
+}
+document.getElementById("draft").onclick = () => save("draft");
+document.getElementById("submit").onclick = () => {
+  let T = 0, D = 0; for (const s of TREE.sections) { const c = counts(s); T += c.total; D += c.done; }
+  if (D < T && !confirm(`아직 ${T - D}개가 비었거나 확인 전입니다. 그래도 제출할까요? (빈 것은 나중에 다시 묻습니다)`)) return;
+  save("complete");
+};
+document.getElementById("load").onclick = async () => {
+  if (SERVER) { try { const r = await fetch("api/latest"); if (r.ok) { const j = await r.json(); if (j && j.form) return loadDoc(j); } } catch (e) {} }
+  document.getElementById("file").click();
+};
+document.getElementById("file").onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(t => { try { loadDoc(JSON.parse(t)); } catch (x) { toast("읽을 수 없는 파일입니다"); } }); };
+document.getElementById("fAll").onclick = () => { st.filter = "all"; persist(); render(); };
+document.getElementById("fTodo").onclick = () => { st.filter = "todo"; st.view = "form"; persist(); render(); };
+document.getElementById("tabSum").onclick = () => { st.view = st.view === "sum" ? "form" : "sum"; render(); window.scrollTo(0, 0); };
+document.getElementById("tabTerms").onclick = () => { st.view = st.view === "terms" ? "form" : "terms"; render(); window.scrollTo(0, 0); };
+document.getElementById("tabNova").onclick = () => { st.view = st.view === "nova" ? "form" : "nova"; render(); window.scrollTo(0, 0); };
+render();
+if (st.saved || Object.values(st.answers).some(a => a.state !== "prefill")) toast("이전에 쓰던 내용을 불러왔습니다 — 이어서 쓰세요");
+</script>
+</body>
+</html>

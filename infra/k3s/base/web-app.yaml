@@ -1,0 +1,47 @@
+# 생성 파일 — scripts/gen_k3s.py (services.json · nova.project.json). 직접 고치지 않는다.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: edge
+  labels: {app: web-app, nova.dev/tier: web}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: web-app}}
+  template:
+    metadata:
+      labels: {app: web-app, nova.dev/tier: web}
+    spec:
+      automountServiceAccountToken: false
+      securityContext: {runAsNonRoot: true, runAsUser: 1000, seccompProfile: {type: RuntimeDefault}}
+      containers:
+      - name: web
+        image: nova/web-app:dev
+        ports: [{name: http, containerPort: 3000}]
+        resources:
+          requests: {cpu: 25m, memory: 96Mi}
+          limits: {memory: 256Mi}
+        readinessProbe: {httpGet: {path: /, port: http}, periodSeconds: 5, failureThreshold: 3}
+        livenessProbe: {httpGet: {path: /, port: http}, initialDelaySeconds: 15, periodSeconds: 15}
+        startupProbe: {httpGet: {path: /, port: http}, periodSeconds: 2, failureThreshold: 30}
+        securityContext: {allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: {drop: [ALL]}}
+        volumeMounts: [{name: tmp, mountPath: /tmp}, {name: next-cache, mountPath: /web/apps/app/.next/cache}]
+      volumes: [{name: tmp, emptyDir: {sizeLimit: 64Mi}}, {name: next-cache, emptyDir: {sizeLimit: 64Mi}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app
+  namespace: edge
+spec:
+  selector: {app: web-app}
+  ports: [{name: http, port: 3000, targetPort: http}]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web-app
+  namespace: edge
+spec:
+  maxUnavailable: 1
+  selector: {matchLabels: {app: web-app}}

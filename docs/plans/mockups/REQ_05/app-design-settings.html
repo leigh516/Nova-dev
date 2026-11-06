@@ -1,0 +1,114 @@
+<!-- mockup: {"app": "app", "active": "/design", "title": "디자인 — SettingsPage 시연(바뀐 뒤)", "width": 1280} -->
+<style>
+/* 목업 전용 — plan_REQ_05 §2 의 새 의미 토큰 이름 · §1.1 후보 값을 흉내 낸다. 1단계에서 brand.tokens.json 으로 옮기면 이 블록은 버린다(실제 화면에 복사 금지). */
+:root {
+  --color-bg-nav: #1E2366; --color-bg-nav-active: #A3ABF7;
+  --color-text-on-nav: #F7F8FA; --color-text-on-nav-muted: #9AA2B1; --color-text-on-nav-active: #141821; --color-border-focus-on-nav: #A3ABF7;
+  --color-status-success-solid: #0E7A57; --color-status-warning-solid: #F5B83D; --color-status-danger-solid: #B42F2F;
+  --color-status-info-solid: #4F5BD5; --color-status-neutral-solid: #586172;
+  --color-status-on-solid: #FFFFFF; --color-status-on-warning-solid: #141821;
+  --color-ai-fg: #6D28D9; --color-ai-bg: #EDE9FE; --color-ai-border: #6D28D9;
+  --color-chart-1: #2A64D0; --color-chart-2: #0D7D72; --color-chart-3: #A35A09; --color-chart-4: #C2410C; --color-chart-5: #7C4DDB; --color-chart-6: #C2307A;
+  --color-domain-1-mark: #2A64D0; --color-domain-2-mark: #0D7D72; --color-domain-3-mark: #A35A09; --color-domain-4-mark: #C2410C; --color-domain-5-mark: #7C4DDB; --color-domain-6-mark: #C2307A;
+  --color-domain-1-text: #2A64D0; --color-domain-2-text: #0D7D72; --color-domain-3-text: #A35A09; --color-domain-4-text: #C2410C; --color-domain-5-text: #7C4DDB; --color-domain-6-text: #C2307A;
+}
+:root[data-theme="dark"] {
+  --color-status-success-solid: #5CC79B; --color-status-warning-solid: #F9CF73; --color-status-danger-solid: #F08A8A;
+  --color-status-info-solid: #A3ABF7; --color-status-neutral-solid: #9AA2B1;
+  --color-status-on-solid: #141821; --color-status-on-warning-solid: #141821;
+  --color-ai-fg: #C4B5FD; --color-ai-bg: #2A2145; --color-ai-border: #C4B5FD;
+  --color-chart-1: #86AFFF; --color-chart-2: #4FD1C1; --color-chart-3: #F6B35C; --color-chart-4: #FF9A6B; --color-chart-5: #B9A2FF; --color-chart-6: #F59AC6;
+  --color-domain-1-mark: #86AFFF; --color-domain-2-mark: #4FD1C1; --color-domain-3-mark: #F6B35C; --color-domain-4-mark: #FF9A6B; --color-domain-5-mark: #B9A2FF; --color-domain-6-mark: #F59AC6;
+  --color-domain-1-text: #86AFFF; --color-domain-2-text: #4FD1C1; --color-domain-3-text: #F6B35C; --color-domain-4-text: #FF9A6B; --color-domain-5-text: #B9A2FF; --color-domain-6-text: #F59AC6;
+}
+/* 부품 흉내 — 의미 토큰 var(--color-…) 만 쓴다 */
+.badge.solid.success { background: var(--color-status-success-solid); color: var(--color-status-on-solid); }
+.badge.solid.danger { background: var(--color-status-danger-solid); color: var(--color-status-on-solid); }
+.badge.solid.info { background: var(--color-status-info-solid); color: var(--color-status-on-solid); }
+.badge.solid.neutral { background: var(--color-status-neutral-solid); color: var(--color-status-on-solid); }
+.badge.solid.warning { background: var(--color-status-warning-solid); color: var(--color-status-on-warning-solid); }
+.tile { border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); background: var(--color-bg-surface); border: 1px solid var(--color-border-subtle); box-shadow: var(--elevation-card); }
+.tile.solid.danger { background: var(--color-status-danger-solid); border-color: var(--color-status-danger-solid); color: var(--color-status-on-solid); }
+.tile.solid.danger .stat .k, .tile.solid.danger .stat .d { color: var(--color-status-on-solid); }
+.sidebar.deep { background: var(--color-bg-nav); border-right-color: var(--color-bg-nav); }
+.sidebar.deep a { color: var(--color-text-on-nav-muted); }
+.sidebar.deep a.hover { color: var(--color-text-on-nav); }
+.sidebar.deep a[aria-current="page"] { background: var(--color-bg-nav-active); color: var(--color-text-on-nav-active); }
+.sidebar.deep a.focus { outline: 2px solid var(--color-border-focus-on-nav); outline-offset: 2px; }
+.sidebar .group { font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); color: var(--color-text-on-nav-muted); padding: var(--space-3) var(--space-3) var(--space-1); }
+.ai-mark { display: inline-flex; align-items: center; gap: var(--space-1); height: 22px; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-ai-border); background: var(--color-ai-bg); color: var(--color-ai-fg); font-size: var(--font-size-xs); font-weight: var(--font-weight-bold); white-space: nowrap; }
+.ai-card { border: 1px solid var(--color-ai-border); border-radius: var(--radius-lg); background: var(--color-bg-surface); padding: var(--space-5); box-shadow: var(--elevation-card); }
+.ai-card .why { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-ai-bg); color: var(--color-ai-fg); font-size: var(--font-size-sm); }
+.ai-card .actions { margin-top: var(--space-5); display: flex; justify-content: flex-end; gap: var(--space-2); }
+.focus-ring { outline: 2px solid var(--color-border-focus); outline-offset: 2px; }
+.domain-tag { display: inline-flex; align-items: center; gap: var(--space-2); height: 22px; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-border-subtle); background: var(--color-bg-surface); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); white-space: nowrap; }
+.domain-tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--dm); }
+.domain-tag.d1 { --dm: var(--color-domain-1-mark); color: var(--color-domain-1-text); }
+.domain-tag.d2 { --dm: var(--color-domain-2-mark); color: var(--color-domain-2-text); }
+.domain-tag.d3 { --dm: var(--color-domain-3-mark); color: var(--color-domain-3-text); }
+.domain-tag.d4 { --dm: var(--color-domain-4-mark); color: var(--color-domain-4-text); }
+.domain-tag.d5 { --dm: var(--color-domain-5-mark); color: var(--color-domain-5-text); }
+.domain-tag.d6 { --dm: var(--color-domain-6-mark); color: var(--color-domain-6-text); }
+.legend { display: flex; flex-wrap: wrap; gap: var(--space-3); font-size: var(--font-size-xs); color: var(--color-text-secondary); }
+.legend span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.c1 { background: var(--color-chart-1); } .c2 { background: var(--color-chart-2); } .c3 { background: var(--color-chart-3); }
+.c4 { background: var(--color-chart-4); } .c5 { background: var(--color-chart-5); } .c6 { background: var(--color-chart-6); }
+.bars .b i.c1 { background: var(--color-chart-1); } .bars .b i.c2 { background: var(--color-chart-2); } .bars .b i.c3 { background: var(--color-chart-3); }
+.bars .b i.c4 { background: var(--color-chart-4); } .bars .b i.c5 { background: var(--color-chart-5); } .bars .b i.c6 { background: var(--color-chart-6); }
+.dash-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-4); }
+.dash-grid .wide { grid-column: 1 / -1; }
+.stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+.block-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-3); }
+.split { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.table tbody tr[aria-selected="true"] td { background: var(--color-status-info-bg); }
+.settings { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+.subnav { display: flex; flex-direction: column; gap: var(--space-1); }
+.subnav a { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--color-text-secondary); font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
+.subnav a[aria-current="page"] { background: var(--color-status-info-bg); color: var(--color-text-brand); }
+.setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border-subtle); }
+.frame { background: var(--color-bg-subtle); border-radius: var(--radius-lg); padding: var(--space-5); }
+.dialog.static { width: 100%; }
+.dialog.sm { max-width: 360px; } .dialog.md { max-width: 520px; } .dialog.lg { max-width: 720px; }
+.dialog .dhead { display: flex; justify-content: space-between; align-items: center; }
+.hsearch { display: flex; align-items: center; gap: var(--space-2); height: 36px; min-width: 280px; padding: 0 var(--space-3); border-radius: var(--radius-md); background: var(--color-bg-inverse2); color: var(--color-text-inverse-muted); font-size: var(--font-size-sm); }
+.hsearch kbd { margin-left: auto; background: transparent; color: var(--color-text-inverse-muted); border-color: var(--color-text-inverse-muted); }
+.notif { position: relative; }
+.notif .count { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: var(--radius-pill); display: grid; place-items: center; font-size: 11px; font-weight: var(--font-weight-bold); background: var(--color-status-danger-solid); color: var(--color-status-on-solid); }
+.tenant { display: flex; align-items: center; gap: var(--space-2); height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-bg-inverse2); color: var(--color-text-inverse); font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); background: transparent; }
+.tenant small { color: var(--color-text-inverse-muted); font-weight: var(--font-weight-regular); }
+.menu { position: absolute; right: 0; top: 44px; width: 260px; background: var(--color-bg-surface); color: var(--color-text-primary); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-md); box-shadow: var(--elevation-overlay); padding: var(--space-2); z-index: 5; }
+.menu button { all: unset; display: flex; justify-content: space-between; width: calc(100% - 2 * var(--space-3)); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); font-size: var(--font-size-sm); cursor: pointer; }
+.menu button[aria-checked="true"] { background: var(--color-status-info-bg); color: var(--color-text-brand); font-weight: var(--font-weight-semibold); }
+.progress { height: 6px; border-radius: var(--radius-pill); background: var(--color-bg-subtle); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--color-action-primary); }
+.svgline { fill: none; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.check { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+</style>
+<div class="content wide mock-new">
+  <div class="page-header">
+    <div>
+      <nav class="crumbs" aria-label="현재 위치"><span><a href="#">디자인</a></span><span>› <a href="#">설정</a></span></nav>
+      <h1>관제 설정</h1><p class="desc">SettingsPage 시연 — 왼쪽 구역을 고르면 오른쪽에 그 구역만. 구역은 주소(?tab=notifications)에 남고, 저장은 구역마다 따로 합니다.</p>
+    </div>
+  </div>
+  <div class="settings">
+    <nav class="subnav card" aria-label="설정 구역" style="padding:var(--space-2)">
+      <a href="#">일반</a>
+      <a href="#" aria-current="page">알림</a>
+      <a href="#">경보 기준</a>
+      <a href="#">연동</a>
+      <a href="#">보안</a>
+    </nav>
+    <div class="card stack">
+      <div><h3>알림</h3><p class="small muted" style="margin-top:var(--space-1)">경보가 생기면 누구에게 어떤 수단으로 알릴지 정합니다.</p></div>
+      <div>
+        <div class="setting-row"><div><strong class="small">위험 경보 즉시 알림</strong><p class="xs muted">위험 등급이 생기면 담당자에게 바로 보냅니다</p></div><button class="switch" role="switch" aria-checked="true" aria-label="위험 경보 즉시 알림"></button></div>
+        <div class="setting-row"><div><strong class="small">경고 묶음 알림</strong><p class="xs muted">경고는 10분마다 묶어서 보냅니다</p></div><button class="switch" role="switch" aria-checked="false" aria-label="경고 묶음 알림"></button></div>
+        <div class="setting-row"><div><strong class="small">알림 수단</strong><p class="xs muted">여러 개를 고를 수 있습니다</p></div><div class="seg"><button aria-pressed="true">메일</button><button aria-pressed="true">문자</button><button aria-pressed="false">메신저</button></div></div>
+      </div>
+      <div class="field" style="max-width:420px"><label>야간 담당 메일</label><input class="input" value="night-ops@example.com"><span class="help">22시 ~ 08시 위험 경보는 이 주소로 갑니다</span></div>
+      <div class="row between"><span class="xs muted">바뀐 항목 2개 — 이 구역만 저장됩니다</span><div class="row"><button class="btn ghost">되돌리기</button><button class="btn primary">알림 설정 저장</button></div></div>
+    </div>
+  </div>
+</div>
